@@ -138,7 +138,7 @@ export const TRAILS: Record<string, TrailConfig> = {
   },
   "diamond.signal": { color: "#00ffff", mode: "dots", size: 2.8, spread: 2.2, gravity: 0, life: 34 },
   "diamond.starfall": { color: "#87ceeb", mode: "stars", size: 4.6, spread: 1.1, gravity: 0.06, life: 52 },
-  "prism.refraction": { color: "#c9a4ff", mode: "sparks", size: 3.1, spread: 2.8, gravity: 0, life: 34 },
+  "prism.refraction": { color: "#c9a4ff", mode: "sparks", size: 3.3, spread: 3, gravity: 0, life: 40 },
 };
 
 export type BackdropVariant = "circuit" | "orbit" | "horizon" | "signal" | "quasar";

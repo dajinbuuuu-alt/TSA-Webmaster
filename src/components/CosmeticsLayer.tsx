@@ -15,6 +15,32 @@ import {
  * background and accent colour, with the colours the student picked.
  */
 
+function mixWithWhite(hex: string, amount: number) {
+  const value = hex.replace("#", "");
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  const mix = (channel: number) => Math.round(channel + (255 - channel) * amount);
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
+
+/** A cached soft dot, drawn under stars and streak heads so they bloom. */
+function glowSprite(color: string) {
+  const size = 64;
+  const sprite = document.createElement("canvas");
+  sprite.width = size;
+  sprite.height = size;
+  const ctx = sprite.getContext("2d");
+  if (!ctx) return sprite;
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+  gradient.addColorStop(0.3, color);
+  gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  return sprite;
+}
+
 function TrailCanvas({ config }: { config: TrailConfig }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -42,6 +68,7 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
 
     let particles: Particle[] = [];
     let frame = 0;
+    const glow = glowSprite(config.color);
     let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const resize = () => {
@@ -101,8 +128,20 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
           context.font = `${particle.size}px "JetBrains Mono", monospace`;
           context.fillText(particle.char, particle.x, particle.y);
         } else if (config.mode === "stars") {
-          const radius = Math.max(1, particle.size * (0.45 + alpha * 0.85));
+          const twinkle = 0.72 + 0.28 * Math.sin(particle.life * 0.5 + particle.angle * 4);
+          const radius = Math.max(1, particle.size * (0.45 + alpha * 0.85) * twinkle);
           particle.angle += particle.spin;
+
+          context.globalAlpha = alpha * 0.55;
+          context.drawImage(
+            glow,
+            particle.x - radius * 2.6,
+            particle.y - radius * 2.6,
+            radius * 5.2,
+            radius * 5.2,
+          );
+          context.globalAlpha = alpha;
+
           context.save();
           context.translate(particle.x, particle.y);
           context.rotate(particle.angle);
@@ -120,25 +159,47 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
           context.fill();
           context.restore();
         } else if (config.mode === "sparks") {
-          context.strokeStyle = config.color;
+          const tail = 7.6;
+          const tailX = particle.x - particle.vx * tail;
+          const tailY = particle.y - particle.vy * tail;
           context.lineCap = "round";
-          // A wide faint pass under a bright core reads as a light streak.
-          context.globalAlpha = alpha * 0.3;
-          context.lineWidth = Math.max(1.4, particle.size * 2.6 * alpha);
+
+          // Wide, faint under-stroke: the bloom around the light.
+          context.globalAlpha = alpha * 0.28;
+          context.strokeStyle = config.color;
+          context.lineWidth = Math.max(1.4, particle.size * 2.8 * alpha);
           context.beginPath();
-          context.moveTo(particle.x, particle.y);
-          context.lineTo(particle.x - particle.vx * 6, particle.y - particle.vy * 6);
+          context.moveTo(tailX, tailY);
+          context.lineTo(particle.x, particle.y);
           context.stroke();
+
+          // The body of the streak.
           context.globalAlpha = alpha;
           context.lineWidth = Math.max(1, particle.size * alpha);
           context.beginPath();
-          context.moveTo(particle.x, particle.y);
-          context.lineTo(particle.x - particle.vx * 6, particle.y - particle.vy * 6);
+          context.moveTo(tailX, tailY);
+          context.lineTo(particle.x, particle.y);
           context.stroke();
-          context.fillStyle = config.color;
+
+          // A whiter core, shorter than the streak, reads as refracted light.
+          context.globalAlpha = alpha * 0.85;
+          context.strokeStyle = mixWithWhite(config.color, 0.72);
+          context.lineWidth = Math.max(0.8, particle.size * 0.42 * alpha);
+          const coreX = particle.x - particle.vx * tail * 0.55;
+          const coreY = particle.y - particle.vy * tail * 0.55;
           context.beginPath();
-          context.arc(particle.x, particle.y, Math.max(0.6, particle.size * 0.5 * alpha), 0, Math.PI * 2);
-          context.fill();
+          context.moveTo(coreX, coreY);
+          context.lineTo(particle.x, particle.y);
+          context.stroke();
+
+          context.globalAlpha = alpha * 0.6;
+          context.drawImage(
+            glow,
+            particle.x - particle.size * 2.6,
+            particle.y - particle.size * 2.6,
+            particle.size * 5.2,
+            particle.size * 5.2,
+          );
         } else {
           context.fillStyle = config.color;
           context.beginPath();

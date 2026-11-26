@@ -227,11 +227,21 @@
   }
 }
 
+/* 4-star: a crisp band of the whole spectrum, moving fast enough to read. */
 .flair-ring {
-  padding: 1px;
-  background: linear-gradient(90deg, #00ffff, #8f00ff, #b76e79, #ffd700, #00ffff);
-  background-size: 300% 100%;
-  animation: ring 4s linear infinite;
+  padding: 1.5px;
+  background: linear-gradient(
+    90deg,
+    #00ffff,
+    #40e0d0,
+    #8f00ff,
+    #b76e79,
+    #ffd700,
+    #00ffff
+  );
+  background-size: 360% 100%;
+  animation: ring 2.8s linear infinite;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.18);
 }
 
 .flair-ring > span {
@@ -261,6 +271,11 @@
   padding: 1px;
 }
 
+.profile-avatar.flair-halo::before {
+  inset: -3px;
+  border-radius: 3px;
+}
+
 .profile-avatar.flair-ring > span,
 .profile-avatar.flair-halo > span {
   display: grid;
@@ -277,12 +292,23 @@
   border-radius: 3px;
 }
 
-/* Prism: a gold ring that walks the spectrum. */
+/* 5-star: not another rainbow -- a single gold band with a slow sheen and a
+   faint outer ring, so it reads as a halo rather than a spectrum. */
 .flair-halo {
+  position: relative;
   border-radius: 999px;
   padding: 1px;
-  background: conic-gradient(from 0deg, #ffffff, #ffd700, #87ceeb, #8f00ff, #ffffff);
-  animation: halo-hue 7s linear infinite;
+  background: linear-gradient(
+    100deg,
+    #fff3c4,
+    #ffd700 30%,
+    #fff8dc 50%,
+    #f0b429 70%,
+    #fff3c4
+  );
+  background-size: 320% 100%;
+  animation: halo-sweep 7s linear infinite;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3);
 }
 
 .flair-halo > span {
@@ -292,9 +318,31 @@
   padding: 2px 8px;
 }
 
-@keyframes halo-hue {
+.flair-halo::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 233, 168, 0.45);
+  animation: halo-ring 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes halo-sweep {
   to {
-    filter: hue-rotate(360deg);
+    background-position: 320% 0;
+  }
+}
+
+@keyframes halo-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.18;
   }
 }
 
