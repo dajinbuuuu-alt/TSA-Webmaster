@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { UNITS, type Tier } from "../data/units";
 import {
+  COSMETICS,
   cosmeticById,
   cosmeticsFor,
   dupeRefundFor,
@@ -15,7 +16,7 @@ import {
   type RewardKind,
 } from "./economy";
 import { getSession, subscribeAuth } from "./auth";
-import { isTestMode } from "./testmode";
+import { isTestMode, subscribeTestMode } from "./testmode";
 import { showToast } from "./toast";
 
 export type Entry = {
@@ -64,7 +65,19 @@ const emptyLoadout = (): Loadout => ({
   background: null,
   accent: null,
   flair: null,
+  pet: null,
 });
+
+/** Test mode hands you the whole catalogue: the vault, cards and equip all read this. */
+function ownedFor(state: State) {
+  if (!isTestMode()) return state.rewards;
+  const all: Record<string, number> = {};
+  COSMETICS.forEach((item) => {
+    // A truthy stamp, because every "owned?" check in the app is Boolean(...).
+    all[item.id] = 1;
+  });
+  return { ...all, ...state.rewards };
+}
 
 export type Completion = {
   unitId: string;
@@ -151,6 +164,7 @@ function xpOf(state: State) {
 
 function derive(state: State) {
   const xp = xpOf(state);
+  const rewards = ownedFor(state);
   const span = levelSpan(xp);
   return {
     xp,
@@ -161,8 +175,8 @@ function derive(state: State) {
     levelProgress: span.progress,
     completed: state.completed,
     count: Object.keys(state.completed).length,
-    rewards: state.rewards,
-    ownedCount: Object.keys(state.rewards).length,
+    rewards,
+    ownedCount: Object.keys(rewards).length,
     drives: state.drives,
     loadout: state.loadout,
     tints: state.tints,
@@ -199,6 +213,9 @@ subscribeAuth(() => {
   state = load(scope);
   emit();
 });
+
+// Turning test mode on or off changes which cosmetics count as owned.
+subscribeTestMode(() => emit());
 
 export function getSnapshot() {
   return snapshot;
@@ -316,7 +333,7 @@ export function buyDrive(): PurchaseOutcome {
 export function equipItem(itemId: string): boolean {
   if (!scope) return false;
   const item = cosmeticById(itemId);
-  if (!item || !state.rewards[item.id]) return false;
+  if (!item || (!isTestMode() && !state.rewards[item.id])) return false;
 
   const loadout = { ...state.loadout };
   item.slots.forEach((slot) => {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import { useProgress } from "../lib/progress";
+import { Pet } from "./Pet";
 import {
   ACCENTS,
   BACKDROPS,
@@ -465,6 +466,7 @@ export function CosmeticsLayer() {
   const cursor = loadout.cursor;
   const trail = loadout.trail;
   const background = loadout.background;
+  const pet = loadout.pet;
 
   const cursorColor = tints.cursor ?? defaultColor("cursor", cursor);
   const trailColor = tints.trail ?? defaultColor("trail", trail);
@@ -504,6 +506,7 @@ export function CosmeticsLayer() {
     <>
       {backdrop && <Backdrop variant={backdrop.variant} color={bgColor} />}
       {trailConfig && <TrailCanvas config={trailConfig} />}
+      {pet && <Pet petId={pet} />}
     </>
   );
 }

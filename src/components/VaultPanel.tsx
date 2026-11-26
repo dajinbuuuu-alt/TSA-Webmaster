@@ -38,6 +38,7 @@ const KIND_LABEL: Record<CosmeticKind, string> = {
   accent: "Accent",
   flair: "Flair",
   theme: "Theme",
+  pet: "Pet",
 };
 
 type CardProps = {
@@ -258,7 +259,7 @@ export function VaultPanel() {
               onClick={() => {
                 toggleTestMode();
                 showToast(
-                  testMode ? "Test mode off · drives cost RAM again" : "Test mode on · drives are free",
+                  testMode ? "Test mode off · drives cost RAM again" : "Test mode on · everything unlocked, drives free",
                   "info",
                 );
               }}
@@ -335,7 +336,7 @@ export function VaultPanel() {
                 )}
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                 {SLOT_ORDER.map((slot) => {
                   const item = loadout[slot] ? cosmeticById(loadout[slot] as string) : null;
                   return (

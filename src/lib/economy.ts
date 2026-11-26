@@ -1,12 +1,32 @@
 import type { Tier } from "../data/units";
 
 export type RewardKind = "lesson" | "test" | "capstone";
-export type CosmeticKind = "cursor" | "trail" | "background" | "accent" | "flair" | "theme";
+export type CosmeticKind =
+  | "cursor"
+  | "trail"
+  | "background"
+  | "accent"
+  | "flair"
+  | "theme"
+  | "pet";
 
-/** The five things you can wear at once. */
-export type CosmeticSlot = "cursor" | "trail" | "background" | "accent" | "flair";
+/** The six things you can wear at once. */
+export type CosmeticSlot =
+  | "cursor"
+  | "trail"
+  | "background"
+  | "accent"
+  | "flair"
+  | "pet";
 
-export const SLOT_ORDER: CosmeticSlot[] = ["cursor", "trail", "background", "accent", "flair"];
+export const SLOT_ORDER: CosmeticSlot[] = [
+  "cursor",
+  "trail",
+  "background",
+  "accent",
+  "flair",
+  "pet",
+];
 
 export const SLOT_LABEL: Record<CosmeticSlot, string> = {
   cursor: "Cursor",
@@ -14,6 +34,7 @@ export const SLOT_LABEL: Record<CosmeticSlot, string> = {
   background: "Background",
   accent: "Accent",
   flair: "Flair",
+  pet: "Pet",
 };
 
 export type Cosmetic = {
@@ -66,30 +87,34 @@ export const STAR_LABEL: Record<Tier, string> = {
   prism: "5★ Prism",
 };
 
-/** The nineteen cosmetics a drive can drop. Weights are percents within a tier. */
+/** Every cosmetic a drive can drop. Weights are shares within a tier. */
 export const COSMETICS: Cosmetic[] = [
   { id: "bronze.hairline", name: "Hairline", detail: "1px crosshair cursor", kind: "cursor", tier: "bronze", weight: 30, slots: ["cursor"] },
   { id: "bronze.block", name: "Block", detail: "Terminal block that inverts over text", kind: "cursor", tier: "bronze", weight: 25, slots: ["cursor"] },
   { id: "bronze.dot", name: "Bot", detail: "Little robot head that watches the pointer", kind: "cursor", tier: "bronze", weight: 20, slots: ["cursor"] },
   { id: "bronze.accent-bronze", name: "Bronze accent", detail: "Bronze profile accent", kind: "accent", tier: "bronze", weight: 15, slots: ["accent"] },
   { id: "bronze.accent-rose", name: "Rose accent", detail: "Rose gold profile accent", kind: "accent", tier: "bronze", weight: 10, slots: ["accent"] },
+  { id: "bronze.pet-moth", name: "Moth", detail: "Pocket moth that flutters in the corner", kind: "pet", tier: "bronze", weight: 8, slots: ["pet"] },
 
   { id: "rose.comet", name: "Comet", detail: "Fading dot trail", kind: "trail", tier: "rose", weight: 30, slots: ["trail"] },
   { id: "rose.dust", name: "Dust", detail: "Fine particle trail", kind: "trail", tier: "rose", weight: 25, slots: ["trail"] },
   { id: "rose.accent-cyan", name: "Cyan accent", detail: "Signal cyan gradient accent", kind: "accent", tier: "rose", weight: 20, slots: ["accent"] },
   { id: "rose.pulse", name: "Pulse", detail: "Dot with a breathing ring", kind: "cursor", tier: "rose", weight: 15, slots: ["cursor"] },
   { id: "rose.accent-violet", name: "Violet accent", detail: "Brand violet gradient accent", kind: "accent", tier: "rose", weight: 10, slots: ["accent"] },
+  { id: "rose.pet-byte", name: "Byte", detail: "Desk bot with one bright eye", kind: "pet", tier: "rose", weight: 10, slots: ["pet"] },
 
   { id: "gold.matrix", name: "Matrix", detail: "Glyph-rain trail", kind: "trail", tier: "gold", weight: 30, slots: ["trail"] },
   { id: "gold.circuit", name: "Circuit", detail: "Faint trace lines behind the hero", kind: "background", tier: "gold", weight: 25, slots: ["background"] },
   { id: "gold.orbit", name: "Orbit", detail: "Slow rotating rings", kind: "background", tier: "gold", weight: 20, slots: ["background"] },
   { id: "gold.glyph", name: "Glyph", detail: "Hex characters that fade", kind: "trail", tier: "gold", weight: 15, slots: ["trail"] },
   { id: "gold.beam", name: "Beam", detail: "Cyan beam that stretches on click", kind: "cursor", tier: "gold", weight: 10, slots: ["cursor"] },
+  { id: "gold.pet-mochi", name: "Mochi", detail: "Cat that naps, stretches and blinks", kind: "pet", tier: "gold", weight: 10, slots: ["pet"] },
 
   { id: "diamond.event-horizon", name: "Event Horizon", detail: "Theme: background, ring and cursor", kind: "theme", tier: "diamond", weight: 40, slots: ["background", "cursor", "flair"] },
   { id: "diamond.signal", name: "Signal", detail: "Theme: waveform background plus trail", kind: "theme", tier: "diamond", weight: 30, slots: ["background", "trail"] },
   { id: "diamond.particle-frame", name: "Particle Frame", detail: "Profile border that drifts", kind: "flair", tier: "diamond", weight: 20, slots: ["flair"] },
   { id: "diamond.spectrum-ring", name: "Spectrum Ring", detail: "Animated gradient around your level", kind: "flair", tier: "diamond", weight: 10, slots: ["flair"] },
+  { id: "diamond.pet-nova", name: "Nova", detail: "Star speck that drifts in orbit", kind: "pet", tier: "diamond", weight: 10, slots: ["pet"] },
 
   { id: "prism.quasar", name: "Quasar", detail: "Theme: light jets, core and cursor", kind: "theme", tier: "prism", weight: 60, slots: ["background", "cursor", "flair"] },
   { id: "prism.halo", name: "Halo", detail: "Rotating ring around your handle", kind: "flair", tier: "prism", weight: 40, slots: ["flair"] },
