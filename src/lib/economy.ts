@@ -53,7 +53,7 @@ export const TIER_ORDER: Tier[] = ["bronze", "rose", "gold", "diamond"];
 export const COSMETICS: Cosmetic[] = [
   { id: "bronze.hairline", name: "Hairline", detail: "1px crosshair cursor", kind: "cursor", tier: "bronze", weight: 30, slots: ["cursor"] },
   { id: "bronze.block", name: "Block", detail: "Terminal block that inverts over text", kind: "cursor", tier: "bronze", weight: 25, slots: ["cursor"] },
-  { id: "bronze.dot", name: "Dot", detail: "4px signal dot", kind: "cursor", tier: "bronze", weight: 20, slots: ["cursor"] },
+  { id: "bronze.dot", name: "Bot", detail: "Little robot head that watches the pointer", kind: "cursor", tier: "bronze", weight: 20, slots: ["cursor"] },
   { id: "bronze.accent-bronze", name: "Bronze accent", detail: "Bronze profile accent", kind: "accent", tier: "bronze", weight: 15, slots: ["accent"] },
   { id: "bronze.accent-rose", name: "Rose accent", detail: "Rose gold profile accent", kind: "accent", tier: "bronze", weight: 10, slots: ["accent"] },
 

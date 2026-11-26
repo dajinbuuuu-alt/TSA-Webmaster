@@ -38,6 +38,11 @@ export type DriveRecord = {
 
 export type Loadout = Record<CosmeticSlot, string | null>;
 
+/** Player-chosen colours for the three recolourable slots. */
+export type TintSlot = "cursor" | "trail" | "background";
+
+export type Tints = Partial<Record<TintSlot, string>>;
+
 type State = {
   version: 1;
   completed: Record<string, Entry>;
@@ -48,6 +53,8 @@ type State = {
   drives: DriveRecord[];
   /** One equipped item per slot. */
   loadout: Loadout;
+  /** Colour overrides for cursor, trail and background. */
+  tints: Tints;
 };
 
 const emptyLoadout = (): Loadout => ({
@@ -96,6 +103,7 @@ const emptyState = (): State => ({
   rewards: {},
   drives: [],
   loadout: emptyLoadout(),
+  tints: {},
 });
 
 function scopeForSession(): string | null {
@@ -126,6 +134,7 @@ function load(key: string | null): State {
       rewards: parsed.rewards ?? {},
       drives: parsed.drives ?? [],
       loadout: { ...emptyLoadout(), ...(parsed.loadout ?? {}) },
+      tints: parsed.tints ?? {},
     };
   } catch {
     return emptyState();
@@ -155,6 +164,7 @@ function derive(state: State) {
     ownedCount: Object.keys(state.rewards).length,
     drives: state.drives,
     loadout: state.loadout,
+    tints: state.tints,
   };
 }
 
@@ -316,6 +326,24 @@ export function equipItem(itemId: string): boolean {
 export function unequipSlot(slot: CosmeticSlot) {
   if (!scope || !state.loadout[slot]) return;
   state = { ...state, loadout: { ...state.loadout, [slot]: null } };
+  persist();
+  emit();
+}
+
+/** Recolour the equipped cursor, trail or background. */
+export function setTint(slot: TintSlot, color: string) {
+  if (!scope) return;
+  if (!/^#[0-9a-f]{6}$/i.test(color)) return;
+  state = { ...state, tints: { ...state.tints, [slot]: color.toLowerCase() } };
+  persist();
+  emit();
+}
+
+export function resetTint(slot: TintSlot) {
+  if (!scope || state.tints[slot] === undefined) return;
+  const tints = { ...state.tints };
+  delete tints[slot];
+  state = { ...state, tints };
   persist();
   emit();
 }

@@ -17,10 +17,13 @@ import {
 import {
   buyDrive,
   equipItem,
+  resetTint,
+  setTint,
   unequipSlot,
   useProgress,
   type DriveResult,
 } from "../lib/progress";
+import { SWATCHES, TINT_SLOTS, defaultColor, type TintSlot } from "../lib/cosmetics";
 import { showToast } from "../lib/toast";
 import { toggleTestMode, useTestMode } from "../lib/testmode";
 import { VAULT_EVENT } from "../lib/vault";
@@ -155,7 +158,7 @@ function TierSection({ tier, rewards, loadout, odds, onEquip }: SectionProps) {
 export function VaultPanel() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<DriveResult | null>(null);
-  const { ram, rewards, ownedCount, loadout } = useProgress();
+  const { ram, rewards, ownedCount, loadout, tints } = useProgress();
   const testMode = useTestMode();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
@@ -355,13 +358,59 @@ export function VaultPanel() {
                         {item?.name ?? "Empty"}
                       </p>
                       {item ? (
-                        <button
-                          type="button"
-                          onClick={() => unequipSlot(slot)}
-                          className="mt-1 font-mono text-[8.5px] tracking-[0.12em] text-dim uppercase underline decoration-white/20 underline-offset-2 hover:text-ink"
-                        >
-                          Remove
-                        </button>
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => unequipSlot(slot)}
+                            className="mt-1 font-mono text-[8.5px] tracking-[0.12em] text-dim uppercase underline decoration-white/20 underline-offset-2 hover:text-ink"
+                          >
+                            Remove
+                          </button>
+
+                          {TINT_SLOTS.includes(slot as TintSlot) && (
+                            <div className="mt-2 flex flex-wrap items-center gap-1">
+                              {SWATCHES.map((swatch) => (
+                                <button
+                                  key={swatch}
+                                  type="button"
+                                  onClick={() => setTint(slot as TintSlot, swatch)}
+                                  aria-label={`Set ${slot} colour ${swatch}`}
+                                  aria-pressed={tints[slot as TintSlot] === swatch}
+                                  className={cn(
+                                    "h-3.5 w-3.5 rounded-full border transition-transform hover:scale-110",
+                                    tints[slot as TintSlot] === swatch
+                                      ? "border-ink ring-1 ring-ink/40"
+                                      : "border-white/25",
+                                  )}
+                                  style={{ backgroundColor: swatch }}
+                                />
+                              ))}
+                              <label
+                                className="relative grid h-3.5 w-3.5 place-items-center rounded-full border border-dashed border-white/35 text-[8px] leading-none text-dim"
+                                title="Custom colour"
+                              >
+                                +
+                                <input
+                                  type="color"
+                                  value={tints[slot as TintSlot] ?? defaultColor(slot as TintSlot, item.id)}
+                                  onChange={(event) => setTint(slot as TintSlot, event.target.value)}
+                                  aria-label={`Custom ${slot} colour`}
+                                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                                />
+                              </label>
+                            </div>
+                          )}
+
+                          {tints[slot as TintSlot] && (
+                            <button
+                              type="button"
+                              onClick={() => resetTint(slot as TintSlot)}
+                              className="mt-1.5 block font-mono text-[8px] tracking-[0.12em] text-dim/70 uppercase hover:text-ink"
+                            >
+                              Reset colour
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <span className="mt-1 block font-mono text-[8.5px] tracking-[0.12em] text-dim/35 uppercase">
                           None
