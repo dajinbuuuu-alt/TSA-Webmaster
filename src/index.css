@@ -253,6 +253,30 @@
   box-shadow: 0 0 16px rgba(0, 255, 255, 0.3);
 }
 
+/* The profile avatar is a square tile, so the navbar pill flair rules need
+   squaring off and the letter kept centred inside the ring. */
+.profile-avatar.flair-ring,
+.profile-avatar.flair-halo {
+  border-radius: 3px;
+  padding: 1px;
+}
+
+.profile-avatar.flair-ring > span,
+.profile-avatar.flair-halo > span {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  border-radius: 2px;
+  background: #05070a;
+}
+
+.profile-avatar.flair-frame,
+.profile-avatar.flair-horizon {
+  border-radius: 3px;
+}
+
 /* Prism: a gold ring that walks the spectrum. */
 .flair-halo {
   border-radius: 999px;

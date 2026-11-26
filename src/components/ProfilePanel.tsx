@@ -140,14 +140,14 @@ export function ProfilePanel() {
           <div className="flex flex-wrap items-center gap-4 border border-white/10 bg-[#0f1319] p-4">
             <div
               className={cn(
-                "grid h-14 w-14 shrink-0 place-items-center rounded-[3px] border border-white/15 bg-black font-display text-[22px] text-ink",
+                "profile-avatar grid h-14 w-14 shrink-0 place-items-center rounded-[3px] border border-white/15 bg-black font-display text-[22px] text-ink",
                 flair === "frame" && "flair-frame",
                 flair === "ring" && "flair-ring",
                 flair === "horizon" && "flair-horizon",
                 flair === "halo" && "flair-halo",
               )}
             >
-              <span className="grid h-full w-full place-items-center">{initial}</span>
+              <span className="profile-avatar-inner grid h-full w-full place-items-center">{initial}</span>
             </div>
 
             <div className="min-w-[200px] flex-1">
