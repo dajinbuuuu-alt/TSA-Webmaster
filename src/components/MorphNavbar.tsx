@@ -4,6 +4,7 @@ import { getSession, requestAuth, signOut, useSession } from "../lib/auth";
 import { findAccount } from "../lib/accounts";
 import { useProgress } from "../lib/progress";
 import { announceSoon } from "../lib/soon";
+import { openVault } from "../lib/vault";
 import { cn } from "../lib/cn";
 
 const LINKS = [
@@ -93,7 +94,7 @@ export function MorphNavbar() {
               <button
                 key={link.label}
                 type="button"
-                onClick={announceSoon}
+                onClick={link.label === "Reward Vault" ? openVault : announceSoon}
                 className="px-3 py-2 text-[13px] text-dim transition-colors hover:text-ink"
               >
                 {link.label}
@@ -181,7 +182,8 @@ export function MorphNavbar() {
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
-                    announceSoon();
+                    if (link.label === "Reward Vault") openVault();
+                    else announceSoon();
                   }}
                   className="block w-full border-b border-white/[0.06] py-3 text-left text-[14px] text-dim"
                 >

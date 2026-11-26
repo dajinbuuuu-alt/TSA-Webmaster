@@ -1,7 +1,18 @@
 import { useSyncExternalStore } from "react";
-import { UNITS } from "../data/units";
-import { levelSpan, ramFor, xpFor, type RewardKind } from "./economy";
+import { UNITS, type Tier } from "../data/units";
+import {
+  cosmeticsFor,
+  dupeRefundFor,
+  ECONOMY,
+  levelSpan,
+  ramFor,
+  tierForHits,
+  xpFor,
+  type Cosmetic,
+  type RewardKind,
+} from "./economy";
 import { getSession, subscribeAuth } from "./auth";
+import { showToast } from "./toast";
 
 export type Entry = {
   kind: RewardKind;
@@ -11,10 +22,25 @@ export type Entry = {
   at: number;
 };
 
+export type DriveRecord = {
+  id: string;
+  tier: Tier;
+  taps: boolean[];
+  hits: number;
+  itemId: string;
+  duplicate: boolean;
+  refund: number;
+  at: number;
+};
+
 type State = {
   version: 1;
   completed: Record<string, Entry>;
   ram: number;
+  /** Owned cosmetics: item id → when it was won. */
+  rewards: Record<string, number>;
+  /** Newest first, capped so storage can't grow without bound. */
+  drives: DriveRecord[];
 };
 
 export type Completion = {
@@ -28,12 +54,27 @@ export type Completion = {
 
 export type Award = { xp: number; ram: number; leveledUp: boolean };
 
+export type DriveResult = {
+  taps: boolean[];
+  hits: number;
+  tier: Tier;
+  item: Cosmetic;
+  duplicate: boolean;
+  refund: number;
+  ramAfter: number;
+};
+
+export type PurchaseOutcome =
+  | { ok: true; result: DriveResult }
+  | { ok: false; error: string; shortfall: number };
+
 export const REWARD_EVENT = "synapse:reward";
 
 const VERSION = 1;
+const DRIVE_HISTORY = 40;
 const listeners = new Set<() => void>();
 
-const emptyState = (): State => ({ version: VERSION, completed: {}, ram: 0 });
+const emptyState = (): State => ({ version: VERSION, completed: {}, ram: 0, rewards: {}, drives: [] });
 
 function scopeForSession(): string | null {
   const session = getSession();
@@ -46,7 +87,7 @@ function load(key: string | null): State {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return emptyState();
-    const parsed = JSON.parse(raw) as State;
+    const parsed = JSON.parse(raw) as Partial<State>;
     if (
       parsed?.version !== VERSION ||
       typeof parsed.ram !== "number" ||
@@ -55,7 +96,14 @@ function load(key: string | null): State {
     ) {
       return emptyState();
     }
-    return parsed;
+    // Saved progress from before drives existed still loads.
+    return {
+      version: VERSION,
+      completed: parsed.completed,
+      ram: parsed.ram,
+      rewards: parsed.rewards ?? {},
+      drives: parsed.drives ?? [],
+    };
   } catch {
     return emptyState();
   }
@@ -80,6 +128,9 @@ function derive(state: State) {
     levelProgress: span.progress,
     completed: state.completed,
     count: Object.keys(state.completed).length,
+    rewards: state.rewards,
+    ownedCount: Object.keys(state.rewards).length,
+    drives: state.drives,
   };
 }
 
@@ -155,6 +206,68 @@ export function completeLesson(input: Completion): Award | null {
   const award: Award = { xp, ram, leveledUp };
   announce(award);
   return award;
+}
+
+function pickCosmetic(tier: Tier): Cosmetic {
+  const pool = cosmeticsFor(tier);
+  const total = pool.reduce((sum, item) => sum + item.weight, 0);
+  let roll = Math.random() * total;
+  for (const item of pool) {
+    roll -= item.weight;
+    if (roll <= 0) return item;
+  }
+  return pool[pool.length - 1];
+}
+
+/**
+ * Buy a drive: 150 RAM leaves immediately, four taps are rolled, and the win is
+ * settled in the same write so closing the screen mid-roll can't lose a reward.
+ */
+export function buyDrive(): PurchaseOutcome {
+  const { cost, taps, tapChance } = ECONOMY.drive;
+
+  if (!scope) {
+    return { ok: false, error: "Pick an account or guest mode before buying a drive.", shortfall: cost };
+  }
+  if (state.ram < cost) {
+    const shortfall = cost - state.ram;
+    return {
+      ok: false,
+      error: `A drive costs ${cost} RAM — you have ${state.ram}. Earn ${shortfall} more RAM in a lesson.`,
+      shortfall,
+    };
+  }
+
+  const results = Array.from({ length: taps }, () => Math.random() < tapChance);
+  const hits = results.filter(Boolean).length;
+  const tier = tierForHits(hits);
+  const item = pickCosmetic(tier);
+  const duplicate = Boolean(state.rewards[item.id]);
+  const refund = duplicate ? dupeRefundFor(tier) : 0;
+  const ramAfter = state.ram - cost + refund;
+
+  const record: DriveRecord = {
+    id: `drive-${Date.now()}-${Math.round(Math.random() * 1e4)}`,
+    tier,
+    taps: results,
+    hits,
+    itemId: item.id,
+    duplicate,
+    refund,
+    at: Date.now(),
+  };
+
+  state = {
+    ...state,
+    ram: ramAfter,
+    rewards: duplicate ? state.rewards : { ...state.rewards, [item.id]: Date.now() },
+    drives: [record, ...state.drives].slice(0, DRIVE_HISTORY),
+  };
+  persist();
+  emit();
+
+  showToast(`−${cost} RAM · drive opened`, "spend");
+  return { ok: true, result: { taps: results, hits, tier, item, duplicate, refund, ramAfter } };
 }
 
 type StubTarget = Omit<Completion, "score" | "firstTry">;

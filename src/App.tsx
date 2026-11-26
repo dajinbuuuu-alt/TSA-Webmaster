@@ -1,5 +1,5 @@
 import type { MouseEvent } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Gift } from "lucide-react";
 import { AuthGate } from "./components/AuthGate";
 import { DecryptText } from "./components/DecryptText";
 import { DottedGlow } from "./components/DottedGlow";
@@ -9,9 +9,13 @@ import { RewardToast } from "./components/RewardToast";
 import { SoonToast } from "./components/SoonToast";
 import { StubBar } from "./components/StubBar";
 import { UnitCard } from "./components/UnitCard";
+import { VaultPanel } from "./components/VaultPanel";
 import { TIER_GRADIENT, TIER_LABEL, UNITS } from "./data/units";
 import { getSession, requestAuth } from "./lib/auth";
+import { COSMETICS } from "./lib/economy";
+import { useProgress } from "./lib/progress";
 import { announceSoon } from "./lib/soon";
+import { openVault } from "./lib/vault";
 
 const FACT_ROW = ["6 units", "About 2 hours", "No account", "Saved on device"];
 
@@ -30,6 +34,7 @@ const PROGRESSION = [
 export default function App() {
   const lessonUnits = UNITS.slice(0, 6);
   const capstone = UNITS[6];
+  const { ownedCount } = useProgress();
 
   const startUnit = () => {
     if (getSession()) {
@@ -136,6 +141,18 @@ export default function App() {
               </div>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <button
+                  type="button"
+                  onClick={openVault}
+                  className="inline-flex h-8 items-center gap-2 rounded-[3px] border border-white/15 px-3 text-[12px] text-ink transition-colors hover:bg-white/[0.05]"
+                >
+                  <Gift className="h-3.5 w-3.5 text-signal" aria-hidden="true" />
+                  Reward vault
+                  <span className="font-mono text-[10px] tracking-[0.12em] text-dim">
+                    {ownedCount}/{COSMETICS.length}
+                  </span>
+                </button>
+
                 {TIERS.map(({ tier, range }) => (
                   <div key={tier} className="flex items-center gap-2">
                     <span
@@ -206,6 +223,7 @@ export default function App() {
       </main>
 
       <AuthGate />
+      <VaultPanel />
       <RewardToast />
       <SoonToast />
     </div>
