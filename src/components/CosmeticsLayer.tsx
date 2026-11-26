@@ -407,44 +407,6 @@ function SignalArt({ color }: { color: string }) {
   );
 }
 
-function QuasarArt({ color }: { color: string }) {
-  return (
-    <svg
-      className="cosmic-svg"
-      viewBox="0 0 1440 900"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-      style={{ color }}
-    >
-      <defs>
-        <radialGradient id="quasar-core">
-          <stop offset="0" stopColor="currentColor" stopOpacity="1" />
-          <stop offset="0.18" stopColor="currentColor" stopOpacity="0.6" />
-          <stop offset="0.5" stopColor="currentColor" stopOpacity="0.16" />
-          <stop offset="1" stopColor="currentColor" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="quasar-jet" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="currentColor" stopOpacity="0" />
-          <stop offset="0.6" stopColor="currentColor" stopOpacity="0.28" />
-          <stop offset="1" stopColor="currentColor" stopOpacity="0.75" />
-        </linearGradient>
-      </defs>
-      <g className="quasar-drift">
-        <circle cx="1010" cy="640" r="330" fill="url(#quasar-core)" opacity="0.8" />
-        <rect x="1002" y="0" width="16" height="600" fill="url(#quasar-jet)" />
-        <rect x="1002" y="680" width="16" height="260" fill="url(#quasar-jet)" transform="rotate(180 1010 810)" />
-        <g fill="none" stroke="currentColor">
-          <ellipse cx="1010" cy="640" rx="210" ry="46" strokeOpacity="0.8" strokeWidth="1.6" />
-          <ellipse cx="1010" cy="640" rx="320" ry="78" strokeOpacity="0.45" />
-          <ellipse cx="1010" cy="640" rx="440" ry="112" strokeOpacity="0.22" />
-        </g>
-        <ellipse cx="1010" cy="640" rx="120" ry="24" fill="none" stroke="currentColor" strokeOpacity="0.5" />
-        <circle cx="1010" cy="640" r="8" fill="currentColor" />
-      </g>
-    </svg>
-  );
-}
-
 function Backdrop({ variant, color }: { variant: string; color: string }) {
   if (variant === "horizon") {
     return (
@@ -457,7 +419,15 @@ function Backdrop({ variant, color }: { variant: string; color: string }) {
   }
   if (variant === "orbit") return <OrbitArt color={color} />;
   if (variant === "signal") return <SignalArt color={color} />;
-  if (variant === "quasar") return <QuasarArt color={color} />;
+  if (variant === "quasar") {
+    return (
+      <div
+        aria-hidden="true"
+        className="cosmic-layer cosmic-quasar"
+        style={{ "--bg-color": color } as CSSProperties}
+      />
+    );
+  }
   return <CircuitArt color={color} />;
 }
 

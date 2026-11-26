@@ -146,7 +146,7 @@ export const BACKDROPS: Record<string, { variant: BackdropVariant; color: string
   "gold.orbit": { variant: "orbit", color: "#ffd700" },
   "diamond.event-horizon": { variant: "horizon", color: "#ff8a3d" },
   "diamond.signal": { variant: "signal", color: "#00ffff" },
-  "prism.quasar": { variant: "quasar", color: "#eaf1f8" },
+  "prism.quasar": { variant: "quasar", color: "#ffb066" },
 };
 
 export type FlairVariant = "frame" | "ring" | "horizon" | "halo";

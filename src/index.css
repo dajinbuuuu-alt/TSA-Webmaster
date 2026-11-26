@@ -487,24 +487,6 @@
   animation-duration: 17s;
 }
 
-.quasar-drift {
-  transform-box: view-box;
-  transform-origin: 1010px 640px;
-  animation: quasar-drift 26s ease-in-out infinite;
-}
-
-@keyframes quasar-drift {
-  0%,
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.92;
-  }
-  50% {
-    transform: scale(1.03) rotate(2deg);
-    opacity: 1;
-  }
-}
-
 @keyframes signal-dash {
   to {
     stroke-dashoffset: -232;
@@ -543,6 +525,39 @@
   background: var(--bg-color, #ff8a3d);
   mix-blend-mode: color;
   opacity: 0.5;
+}
+
+/* Prism's 5-star backdrop: a quasar photo, tinted at runtime. */
+.cosmic-quasar {
+  background-color: #000;
+  background-image: url("./assets/quasar.jpg");
+  background-position: 64% 50%;
+  background-size: cover;
+  opacity: 0.94;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+}
+
+.cosmic-quasar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #000 0%,
+    rgba(0, 0, 0, 0.86) 22%,
+    rgba(0, 0, 0, 0.44) 44%,
+    transparent 63%
+  );
+}
+
+.cosmic-quasar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-color, #ffb066);
+  mix-blend-mode: color;
+  opacity: 0.3;
 }
 
 /* ---------- Opening a drive ---------- */
@@ -769,6 +784,24 @@
   .cosmic-horizon {
     background-position: 58% 8%;
     opacity: 0.8;
+  }
+
+  .cosmic-quasar {
+    background-position: 56% 42%;
+    opacity: 0.82;
+  }
+
+  .cosmic-quasar::before {
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.52) 40%,
+      #000 96%
+    );
+  }
+
+  .cosmic-quasar::after {
+    opacity: 0.22;
   }
 
   .cosmic-horizon::before {
