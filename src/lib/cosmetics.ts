@@ -103,7 +103,7 @@ export const ACCENTS: Record<string, string> = {
   "rose.accent-violet": "#8f00ff",
 };
 
-export type TrailMode = "dots" | "glyphs";
+export type TrailMode = "dots" | "glyphs" | "stars" | "sparks";
 
 export type TrailConfig = {
   color: string;
@@ -137,6 +137,8 @@ export const TRAILS: Record<string, TrailConfig> = {
     life: 46,
   },
   "diamond.signal": { color: "#00ffff", mode: "dots", size: 2.8, spread: 2.2, gravity: 0, life: 34 },
+  "diamond.starfall": { color: "#87ceeb", mode: "stars", size: 4.6, spread: 1.1, gravity: 0.06, life: 52 },
+  "prism.refraction": { color: "#c9a4ff", mode: "sparks", size: 3.1, spread: 2.8, gravity: 0, life: 34 },
 };
 
 export type BackdropVariant = "circuit" | "orbit" | "horizon" | "signal" | "quasar";

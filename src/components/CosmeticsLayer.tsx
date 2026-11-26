@@ -36,6 +36,8 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
       max: number;
       char?: string;
       size: number;
+      angle: number;
+      spin: number;
     };
 
     let particles: Particle[] = [];
@@ -67,6 +69,8 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
               ? config.chars?.[Math.floor(Math.random() * (config.chars.length || 1))]
               : undefined,
           size: config.size,
+          angle: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 0.09,
         });
       }
       // Hard ceiling so a fast mouse can't grow the list without bound.
@@ -96,6 +100,45 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
           context.fillStyle = config.color;
           context.font = `${particle.size}px "JetBrains Mono", monospace`;
           context.fillText(particle.char, particle.x, particle.y);
+        } else if (config.mode === "stars") {
+          const radius = Math.max(1, particle.size * (0.45 + alpha * 0.85));
+          particle.angle += particle.spin;
+          context.save();
+          context.translate(particle.x, particle.y);
+          context.rotate(particle.angle);
+          context.fillStyle = config.color;
+          context.beginPath();
+          for (let point = 0; point < 8; point += 1) {
+            const reach = point % 2 === 0 ? radius : radius * 0.32;
+            const turn = (Math.PI / 4) * point;
+            const px = Math.cos(turn) * reach;
+            const py = Math.sin(turn) * reach;
+            if (point === 0) context.moveTo(px, py);
+            else context.lineTo(px, py);
+          }
+          context.closePath();
+          context.fill();
+          context.restore();
+        } else if (config.mode === "sparks") {
+          context.strokeStyle = config.color;
+          context.lineCap = "round";
+          // A wide faint pass under a bright core reads as a light streak.
+          context.globalAlpha = alpha * 0.3;
+          context.lineWidth = Math.max(1.4, particle.size * 2.6 * alpha);
+          context.beginPath();
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(particle.x - particle.vx * 6, particle.y - particle.vy * 6);
+          context.stroke();
+          context.globalAlpha = alpha;
+          context.lineWidth = Math.max(1, particle.size * alpha);
+          context.beginPath();
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(particle.x - particle.vx * 6, particle.y - particle.vy * 6);
+          context.stroke();
+          context.fillStyle = config.color;
+          context.beginPath();
+          context.arc(particle.x, particle.y, Math.max(0.6, particle.size * 0.5 * alpha), 0, Math.PI * 2);
+          context.fill();
         } else {
           context.fillStyle = config.color;
           context.beginPath();

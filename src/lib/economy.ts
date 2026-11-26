@@ -114,10 +114,12 @@ export const COSMETICS: Cosmetic[] = [
   { id: "diamond.signal", name: "Signal", detail: "Theme: waveform background plus trail", kind: "theme", tier: "diamond", weight: 30, slots: ["background", "trail"] },
   { id: "diamond.particle-frame", name: "Particle Frame", detail: "Profile border that drifts", kind: "flair", tier: "diamond", weight: 20, slots: ["flair"] },
   { id: "diamond.spectrum-ring", name: "Spectrum Ring", detail: "Animated gradient around your level", kind: "flair", tier: "diamond", weight: 10, slots: ["flair"] },
+  { id: "diamond.starfall", name: "Starfall", detail: "Four-point stars that fall and twinkle", kind: "trail", tier: "diamond", weight: 8, slots: ["trail"] },
   { id: "diamond.pet-nova", name: "Nova", detail: "Star speck that drifts in orbit", kind: "pet", tier: "diamond", weight: 10, slots: ["pet"] },
 
   { id: "prism.quasar", name: "Quasar", detail: "Theme: light jets, core and cursor", kind: "theme", tier: "prism", weight: 60, slots: ["background", "cursor", "flair"] },
   { id: "prism.halo", name: "Halo", detail: "Rotating ring around your handle", kind: "flair", tier: "prism", weight: 40, slots: ["flair"] },
+  { id: "prism.refraction", name: "Refraction", detail: "Light streaks that split behind the pointer", kind: "trail", tier: "prism", weight: 30, slots: ["trail"] },
 ];
 
 /** Four taps, one star each: 0 hits is 1★, 4 hits is 5★. */
