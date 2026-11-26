@@ -43,11 +43,28 @@ export const ECONOMY = {
     capstone: { xp: 0, ram: 0 },
   },
   levels: [0, 250, 600, 1100, 1750, 2600, 3700, 5100, 6800, 9000],
-  drive: { cost: 150, taps: 4, tapChance: 0.5 },
-  dupeRefund: { bronze: 30, rose: 60, gold: 120, diamond: 250 },
+  drive: { cost: 150, taps: 4 },
+  dupeRefund: { bronze: 30, rose: 60, gold: 120, diamond: 250, prism: 350 },
 } as const;
 
-export const TIER_ORDER: Tier[] = ["bronze", "rose", "gold", "diamond"];
+export const TIER_ORDER: Tier[] = ["bronze", "rose", "gold", "diamond", "prism"];
+
+/** The star table a drive lands on. These five add up to exactly 100%. */
+export const STAR_ODDS: Record<Tier, number> = {
+  bronze: 0.3164,
+  rose: 0.4304,
+  gold: 0.2025,
+  diamond: 0.0406,
+  prism: 0.0101,
+};
+
+export const STAR_LABEL: Record<Tier, string> = {
+  bronze: "1★ Bronze",
+  rose: "2★ Rose Gold",
+  gold: "3★ Gold",
+  diamond: "4★ Diamond",
+  prism: "5★ Prism",
+};
 
 /** The nineteen cosmetics a drive can drop. Weights are percents within a tier. */
 export const COSMETICS: Cosmetic[] = [
@@ -73,33 +90,31 @@ export const COSMETICS: Cosmetic[] = [
   { id: "diamond.signal", name: "Signal", detail: "Theme: waveform background plus trail", kind: "theme", tier: "diamond", weight: 30, slots: ["background", "trail"] },
   { id: "diamond.particle-frame", name: "Particle Frame", detail: "Profile border that drifts", kind: "flair", tier: "diamond", weight: 20, slots: ["flair"] },
   { id: "diamond.spectrum-ring", name: "Spectrum Ring", detail: "Animated gradient around your level", kind: "flair", tier: "diamond", weight: 10, slots: ["flair"] },
+
+  { id: "prism.quasar", name: "Quasar", detail: "Theme: light jets, core and cursor", kind: "theme", tier: "prism", weight: 60, slots: ["background", "cursor", "flair"] },
+  { id: "prism.halo", name: "Halo", detail: "Rotating ring around your handle", kind: "flair", tier: "prism", weight: 40, slots: ["flair"] },
 ];
 
-/** A drive starts Bronze and moves up one tier per successful tap. */
+/** Four taps, one star each: 0 hits is 1★, 4 hits is 5★. */
 export function tierForHits(hits: number): Tier {
-  const { taps } = ECONOMY.drive;
-  if (hits >= taps) return "diamond";
-  if (hits >= taps - 1) return "gold";
-  if (hits >= taps - 2) return "rose";
-  return "bronze";
+  const index = Math.min(Math.max(hits, 0), TIER_ORDER.length - 1);
+  return TIER_ORDER[index];
 }
 
-function binomial(trials: number, successes: number, chance: number) {
-  let coefficient = 1;
-  for (let index = 0; index < successes; index += 1) {
-    coefficient = (coefficient * (trials - index)) / (index + 1);
-  }
-  return coefficient * chance ** successes * (1 - chance) ** (trials - successes);
-}
-
-/** Odds of each final tier, derived from the tap count and tap chance above. */
+/** The published star table. */
 export function tierChances(): Record<Tier, number> {
-  const { taps, tapChance } = ECONOMY.drive;
-  const odds: Record<Tier, number> = { bronze: 0, rose: 0, gold: 0, diamond: 0 };
-  for (let hits = 0; hits <= taps; hits += 1) {
-    odds[tierForHits(hits)] += binomial(taps, hits, tapChance);
+  return { ...STAR_ODDS };
+}
+
+/** Draw a star from the table above. */
+export function rollTier(): Tier {
+  const roll = Math.random();
+  let cursor = 0;
+  for (const tier of TIER_ORDER) {
+    cursor += STAR_ODDS[tier];
+    if (roll < cursor) return tier;
   }
-  return odds;
+  return TIER_ORDER[TIER_ORDER.length - 1];
 }
 
 export function cosmeticsFor(tier: Tier) {

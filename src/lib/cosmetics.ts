@@ -80,6 +80,15 @@ export const CURSOR_ART: Record<string, CursorArt> = {
       `<circle cx="16" cy="16" r="5.5" fill="none" stroke="${color}" stroke-width="2"/>` +
       `<circle cx="16" cy="16" r="1.6" fill="${color}"/>`,
   },
+  "prism.quasar": {
+    fallback: "crosshair",
+    hotspot: "16 16",
+    color: "#eaf1f8",
+    draw: (color) =>
+      `<path d="M16 1v9M16 22v9M1 16h9M22 16h9" stroke="${color}" stroke-width="1" stroke-opacity="0.8"/>` +
+      `<circle cx="16" cy="16" r="6" fill="none" stroke="${color}" stroke-width="1"/>` +
+      `<circle cx="16" cy="16" r="2.2" fill="${color}"/>`,
+  },
 };
 
 export function cursorUrl(id: string, color: string) {
@@ -130,21 +139,24 @@ export const TRAILS: Record<string, TrailConfig> = {
   "diamond.signal": { color: "#00ffff", mode: "dots", size: 2.8, spread: 2.2, gravity: 0, life: 34 },
 };
 
-export type BackdropVariant = "circuit" | "orbit" | "horizon" | "signal";
+export type BackdropVariant = "circuit" | "orbit" | "horizon" | "signal" | "quasar";
 
 export const BACKDROPS: Record<string, { variant: BackdropVariant; color: string }> = {
   "gold.circuit": { variant: "circuit", color: "#00ffff" },
   "gold.orbit": { variant: "orbit", color: "#ffd700" },
   "diamond.event-horizon": { variant: "horizon", color: "#ff8a3d" },
   "diamond.signal": { variant: "signal", color: "#00ffff" },
+  "prism.quasar": { variant: "quasar", color: "#eaf1f8" },
 };
 
-export type FlairVariant = "frame" | "ring" | "horizon";
+export type FlairVariant = "frame" | "ring" | "horizon" | "halo";
 
 export const FLAIRS: Record<string, FlairVariant> = {
   "diamond.particle-frame": "frame",
   "diamond.spectrum-ring": "ring",
   "diamond.event-horizon": "horizon",
+  "prism.quasar": "halo",
+  "prism.halo": "halo",
 };
 
 /** Colour a slot falls back to when the student hasn't picked one. */

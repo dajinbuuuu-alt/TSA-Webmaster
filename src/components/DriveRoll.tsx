@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft } from "lucide-react";
-import { TIER_GRADIENT, TIER_LABEL } from "../data/units";
-import { ECONOMY, TIER_ORDER, tierForHits } from "../lib/economy";
+import { TIER_GRADIENT } from "../data/units";
+import { ECONOMY, STAR_LABEL, TIER_ORDER, tierForHits } from "../lib/economy";
 import type { DriveResult } from "../lib/progress";
 import { showToast } from "../lib/toast";
 import { cn } from "../lib/cn";
 
 /**
- * The opening. The result is already settled and saved when this mounts, so
+ * The opening. The star is already settled and saved when this mounts, so
  * closing the screen can't cost the student their drop — the case opening and
  * the four taps are the reveal, not the roll.
  */
@@ -51,11 +51,16 @@ export function DriveRoll({ result, onDone }: { result: DriveResult; onDone: () 
         </p>
       </div>
 
-      <div className="mt-3 grid grid-cols-4 gap-1.5">
-        {TIER_ORDER.map((tier) => {
+      <div className="mt-3 grid grid-cols-5 gap-1.5">
+        {TIER_ORDER.map((tier, index) => {
           const active = tier === currentTier;
           return (
-            <div key={tier} className={cn("border-t-2 pt-2", active ? "opacity-100" : "opacity-35")}>
+            <div
+              key={tier}
+              aria-label={STAR_LABEL[tier]}
+              title={STAR_LABEL[tier]}
+              className={cn("border-t-2 pt-2", active ? "opacity-100" : "opacity-35")}
+            >
               <span
                 aria-hidden="true"
                 className="block h-[2px] w-full"
@@ -63,11 +68,11 @@ export function DriveRoll({ result, onDone }: { result: DriveResult; onDone: () 
               />
               <p
                 className={cn(
-                  "mt-2 font-mono text-[9px] tracking-[0.14em] uppercase",
+                  "mt-2 text-center font-mono text-[10px] tracking-[0.04em]",
                   active ? "text-ink" : "text-dim",
                 )}
               >
-                {TIER_LABEL[tier]}
+                {index + 1}★
               </p>
             </div>
           );
@@ -125,10 +130,10 @@ export function DriveRoll({ result, onDone }: { result: DriveResult; onDone: () 
 
         <p className="mt-3 min-h-5 text-center text-[12.5px] text-dim">
           {settled
-            ? `${hitsSoFar} of ${total} taps upgraded`
+            ? `${hitsSoFar} of ${total} taps upgraded · ${STAR_LABEL[currentTier]}`
             : revealed === 0
-              ? `Tap to break the seal. ${total} taps, ${Math.round(ECONOMY.drive.tapChance * 100)}% each.`
-              : `${hitsSoFar} of ${revealed} taps upgraded · now ${TIER_LABEL[currentTier]}`}
+              ? "Tap to break the seal. Every hit lifts the drive a star."
+              : `${hitsSoFar} of ${revealed} taps upgraded · now ${STAR_LABEL[currentTier]}`}
         </p>
       </div>
 
@@ -153,7 +158,7 @@ export function DriveRoll({ result, onDone }: { result: DriveResult; onDone: () 
               style={{ background: TIER_GRADIENT[result.tier] }}
             />
             <span className="font-mono text-[10px] tracking-[0.18em] text-dim uppercase">
-              {TIER_LABEL[result.tier]} drive
+              {STAR_LABEL[result.tier]} drive
             </span>
           </div>
 

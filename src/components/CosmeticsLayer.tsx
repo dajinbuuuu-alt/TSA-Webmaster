@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import { useProgress } from "../lib/progress";
 import {
   ACCENTS,
@@ -128,7 +128,115 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
   );
 }
 
+/** Deterministic PRNG so the board is identical on every render. */
+function mulberry32(seed: number) {
+  let value = seed;
+  return () => {
+    value |= 0;
+    value = (value + 0x6d2b79f5) | 0;
+    let t = Math.imul(value ^ (value >>> 15), 1 | value);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Pin = { x: number; y: number; side: "r" | "l" | "t" | "b" };
+
+const CHIP = { x: 1012, y: 596, w: 292, h: 206 };
+const BOARD = { w: 1440, h: 900 };
+
+/**
+ * A printed circuit board: a central chip, dozens of 45°-routed traces leaving
+ * its pins, and vias where they turn. Generated once, then frozen.
+ */
+function buildCircuit() {
+  const rand = mulberry32(20261126);
+  const front: string[] = [];
+  const back: string[] = [];
+  const vias: { x: number; y: number }[] = [];
+  const pins: Pin[] = [];
+
+  for (let y = CHIP.y + 22; y <= CHIP.y + CHIP.h - 22; y += 13) {
+    pins.push({ x: CHIP.x + CHIP.w, y, side: "r" });
+    pins.push({ x: CHIP.x, y, side: "l" });
+  }
+  for (let x = CHIP.x + 22; x <= CHIP.x + CHIP.w - 22; x += 13) {
+    pins.push({ x, y: CHIP.y, side: "t" });
+    pins.push({ x, y: CHIP.y + CHIP.h, side: "b" });
+  }
+
+  const route = (pin: Pin, into: string[]) => {
+    const horizontal = pin.side === "r" || pin.side === "l";
+    const sign = pin.side === "r" || pin.side === "b" ? 1 : -1;
+    let x = pin.x + (horizontal ? sign * 10 : 0);
+    let y = pin.y + (horizontal ? 0 : sign * 10);
+    let path = `M${pin.x} ${pin.y}L${x} ${y}`;
+
+    const segments = 3 + Math.floor(rand() * 4);
+    for (let index = 0; index < segments; index += 1) {
+      const run = 46 + rand() * 124;
+      if (horizontal) {
+        x += sign * run;
+        path += `H${x}`;
+      } else {
+        y += sign * run;
+        path += `V${y}`;
+      }
+
+      if (rand() < 0.46) {
+        const jog = 14 + rand() * 36;
+        const up = rand() < 0.5 ? -1 : 1;
+        if (horizontal) {
+          x += sign * jog;
+          y += up * jog;
+        } else {
+          y += sign * jog;
+          x += up * jog;
+        }
+        path += `L${x} ${y}`;
+        if (rand() < 0.45) vias.push({ x, y });
+      }
+
+      if (x < -120 || x > BOARD.w + 120 || y < -120 || y > BOARD.h + 120) break;
+    }
+
+    vias.push({ x, y });
+    into.push(path);
+  };
+
+  pins.forEach((pin) => route(pin, front));
+
+  // Loose routing behind the chip for density.
+  for (let index = 0; index < 26; index += 1) {
+    const vertical = rand() < 0.5;
+    const from = vertical
+      ? { x: rand() * BOARD.w, y: rand() < 0.5 ? -20 : BOARD.h + 20, side: (rand() < 0.5 ? "t" : "b") as Pin["side"] }
+      : { x: rand() < 0.5 ? -20 : BOARD.w + 20, y: rand() * BOARD.h, side: (rand() < 0.5 ? "l" : "r") as Pin["side"] };
+    route(from, back);
+  }
+
+  return {
+    front: front.join(""),
+    back: back.join(""),
+    vias,
+  };
+}
+
 function CircuitArt({ color }: { color: string }) {
+  const circuit = useMemo(buildCircuit, []);
+  const pins = useMemo(() => {
+    const list: Pin[] = [];
+    for (let y = CHIP.y + 22; y <= CHIP.y + CHIP.h - 22; y += 13) {
+      list.push({ x: CHIP.x + CHIP.w, y, side: "r" });
+      list.push({ x: CHIP.x, y, side: "l" });
+    }
+    for (let x = CHIP.x + 22; x <= CHIP.x + CHIP.w - 22; x += 13) {
+      list.push({ x, y: CHIP.y, side: "t" });
+      list.push({ x, y: CHIP.y + CHIP.h, side: "b" });
+    }
+    return list;
+  }, []);
+
   return (
     <svg
       className="cosmic-svg"
@@ -138,44 +246,97 @@ function CircuitArt({ color }: { color: string }) {
       style={{ color }}
     >
       <defs>
-        <radialGradient id="circuit-fade" cx="64%" cy="26%" r="70%">
-          <stop offset="0" stopColor="white" stopOpacity="0.85" />
-          <stop offset="0.7" stopColor="white" stopOpacity="0.18" />
-          <stop offset="1" stopColor="white" stopOpacity="0" />
-        </radialGradient>
-        <mask id="circuit-mask">
-          <rect width="1440" height="900" fill="url(#circuit-fade)" />
+        <filter id="pcb-glow" x="-15%" y="-15%" width="130%" height="130%">
+          <feGaussianBlur stdDeviation="2.4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <linearGradient id="pcb-fade-x" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="white" stopOpacity="0" />
+          <stop offset="0.28" stopColor="white" stopOpacity="0.35" />
+          <stop offset="0.62" stopColor="white" stopOpacity="1" />
+          <stop offset="1" stopColor="white" stopOpacity="1" />
+        </linearGradient>
+        <linearGradient id="pcb-fade-y" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="white" stopOpacity="0.9" />
+          <stop offset="0.55" stopColor="white" stopOpacity="1" />
+          <stop offset="1" stopColor="white" stopOpacity="0.15" />
+        </linearGradient>
+        <mask id="pcb-mask-x">
+          <rect width="1440" height="900" fill="url(#pcb-fade-x)" />
+        </mask>
+        <mask id="pcb-mask-y">
+          <rect width="1440" height="900" fill="url(#pcb-fade-y)" />
         </mask>
       </defs>
-      <g
-        mask="url(#circuit-mask)"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.55"
-      >
-        <path d="M60 820V560h250V420h210" />
-        <path d="M120 900V700h340V520h180V360h240" />
-        <path d="M520 900V640h150V460h320" />
-        <path d="M980 900V720h-160V560h300V420h200" />
-        <path d="M1380 900V600h-190V460h-150" />
-        <path d="M760 900V780h260V620h240" />
-      </g>
-      <g mask="url(#circuit-mask)" fill="currentColor" opacity="0.7">
-        {[
-          [310, 560],
-          [570, 420],
-          [460, 700],
-          [1020, 520],
-          [1120, 640],
-          [960, 360],
-          [670, 460],
-          [1180, 420],
-          [820, 620],
-          [1190, 600],
-        ].map(([x, y]) => (
-          <rect key={`${x}-${y}`} x={x - 2} y={y - 2} width="4" height="4" />
-        ))}
+
+      <g mask="url(#pcb-mask-x)">
+        <g mask="url(#pcb-mask-y)" filter="url(#pcb-glow)">
+          <path d={circuit.back} fill="none" stroke="currentColor" strokeWidth="1" strokeOpacity="0.22" />
+          <path d={circuit.front} fill="none" stroke="currentColor" strokeWidth="1.6" strokeOpacity="0.7" />
+
+          <g fill="none" stroke="currentColor" strokeWidth="1.2">
+            {circuit.vias.map((via, index) => (
+              <circle key={index} cx={via.x} cy={via.y} r="3.2" strokeOpacity="0.95" />
+            ))}
+          </g>
+          <g fill="currentColor" opacity="0.95">
+            {circuit.vias.map((via, index) => (
+              <circle key={index} cx={via.x} cy={via.y} r="1.1" />
+            ))}
+          </g>
+
+          {/* the chip */}
+          <g>
+            <rect
+              x={CHIP.x}
+              y={CHIP.y}
+              width={CHIP.w}
+              height={CHIP.h}
+              rx="3"
+              fill="#03060c"
+              stroke="currentColor"
+              strokeOpacity="0.9"
+              strokeWidth="1.5"
+            />
+            <rect
+              x={CHIP.x + 30}
+              y={CHIP.y + 30}
+              width={CHIP.w - 60}
+              height={CHIP.h - 60}
+              fill="none"
+              stroke="currentColor"
+              strokeOpacity="0.3"
+            />
+            <rect
+              x={CHIP.x + 74}
+              y={CHIP.y + 74}
+              width={CHIP.w - 148}
+              height={CHIP.h - 148}
+              fill="none"
+              stroke="currentColor"
+              strokeOpacity="0.22"
+            />
+            <g fill="currentColor" opacity="0.65">
+              {pins.map((pin, index) => {
+                const horizontal = pin.side === "r" || pin.side === "l";
+                const x = horizontal ? pin.x - (pin.side === "r" ? 4 : 0) : pin.x - 2;
+                const y = horizontal ? pin.y - 1.5 : pin.y - (pin.side === "b" ? 4 : 0);
+                return (
+                  <rect
+                    key={index}
+                    x={x}
+                    y={y}
+                    width={horizontal ? 4 : 4}
+                    height={horizontal ? 3 : 4}
+                  />
+                );
+              })}
+            </g>
+          </g>
+        </g>
       </g>
     </svg>
   );
@@ -245,6 +406,44 @@ function SignalArt({ color }: { color: string }) {
   );
 }
 
+function QuasarArt({ color }: { color: string }) {
+  return (
+    <svg
+      className="cosmic-svg"
+      viewBox="0 0 1440 900"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      style={{ color }}
+    >
+      <defs>
+        <radialGradient id="quasar-core">
+          <stop offset="0" stopColor="currentColor" stopOpacity="1" />
+          <stop offset="0.18" stopColor="currentColor" stopOpacity="0.6" />
+          <stop offset="0.5" stopColor="currentColor" stopOpacity="0.16" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="quasar-jet" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="currentColor" stopOpacity="0" />
+          <stop offset="0.6" stopColor="currentColor" stopOpacity="0.28" />
+          <stop offset="1" stopColor="currentColor" stopOpacity="0.75" />
+        </linearGradient>
+      </defs>
+      <g className="quasar-drift">
+        <circle cx="1010" cy="640" r="330" fill="url(#quasar-core)" opacity="0.8" />
+        <rect x="1002" y="0" width="16" height="600" fill="url(#quasar-jet)" />
+        <rect x="1002" y="680" width="16" height="260" fill="url(#quasar-jet)" transform="rotate(180 1010 810)" />
+        <g fill="none" stroke="currentColor">
+          <ellipse cx="1010" cy="640" rx="210" ry="46" strokeOpacity="0.8" strokeWidth="1.6" />
+          <ellipse cx="1010" cy="640" rx="320" ry="78" strokeOpacity="0.45" />
+          <ellipse cx="1010" cy="640" rx="440" ry="112" strokeOpacity="0.22" />
+        </g>
+        <ellipse cx="1010" cy="640" rx="120" ry="24" fill="none" stroke="currentColor" strokeOpacity="0.5" />
+        <circle cx="1010" cy="640" r="8" fill="currentColor" />
+      </g>
+    </svg>
+  );
+}
+
 function Backdrop({ variant, color }: { variant: string; color: string }) {
   if (variant === "horizon") {
     return (
@@ -257,6 +456,7 @@ function Backdrop({ variant, color }: { variant: string; color: string }) {
   }
   if (variant === "orbit") return <OrbitArt color={color} />;
   if (variant === "signal") return <SignalArt color={color} />;
+  if (variant === "quasar") return <QuasarArt color={color} />;
   return <CircuitArt color={color} />;
 }
 

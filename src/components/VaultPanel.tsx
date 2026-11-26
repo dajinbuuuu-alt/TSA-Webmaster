@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Lock, X } from "lucide-react";
-import { TIER_GRADIENT, TIER_LABEL, type Tier } from "../data/units";
+import { TIER_GRADIENT, type Tier } from "../data/units";
 import {
   COSMETICS,
   ECONOMY,
   SLOT_LABEL,
   SLOT_ORDER,
+  STAR_LABEL,
   TIER_ORDER,
   cosmeticById,
   cosmeticsFor,
@@ -126,7 +127,7 @@ function TierSection({ tier, rewards, loadout, odds, onEquip }: SectionProps) {
         <div className="flex items-center gap-2.5">
           <span aria-hidden="true" className="h-[2px] w-7" style={{ background: TIER_GRADIENT[tier] }} />
           <h3 className="font-mono text-[10px] tracking-[0.18em] text-ink uppercase">
-            {TIER_LABEL[tier]}
+            {STAR_LABEL[tier]}
           </h3>
         </div>
         <p className="font-mono text-[9.5px] tracking-[0.14em] text-dim/60 uppercase">
@@ -305,8 +306,7 @@ export function VaultPanel() {
                       Hard Drive · {testMode ? "free in test mode" : `${ECONOMY.drive.cost} RAM`}
                     </p>
                     <p className="mt-1.5 text-[13px] text-ink">
-                      {ECONOMY.drive.taps} free taps, {Math.round(ECONOMY.drive.tapChance * 100)}% each.
-                      Starts Bronze.
+                      {ECONOMY.drive.taps} free taps, one star each. Starts at 1★ Bronze.
                     </p>
                     <p className="mt-1 text-[12px] text-dim">
                       A duplicate turns into RAM instead.

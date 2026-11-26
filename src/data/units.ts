@@ -1,4 +1,4 @@
-export type Tier = "bronze" | "rose" | "gold" | "diamond";
+export type Tier = "bronze" | "rose" | "gold" | "diamond" | "prism";
 
 export type UnitState = "available" | "locked" | "capstone";
 
@@ -18,6 +18,7 @@ export const TIER_GRADIENT: Record<Tier, string> = {
   rose: "linear-gradient(90deg, #B76E79 0%, #6f3a43 100%)",
   gold: "linear-gradient(90deg, #FFD700 0%, #9a7b00 100%)",
   diamond: "linear-gradient(90deg, #87CEEB 0%, #eaf1f8 100%)",
+  prism: "linear-gradient(90deg, #ffffff 0%, #87ceeb 35%, #8f00ff 70%, #ffd700 100%)",
 };
 
 export const TIER_LABEL: Record<Tier, string> = {
@@ -25,6 +26,7 @@ export const TIER_LABEL: Record<Tier, string> = {
   rose: "Rose Gold",
   gold: "Gold",
   diamond: "Diamond",
+  prism: "Prism",
 };
 
 export const UNITS: Unit[] = [

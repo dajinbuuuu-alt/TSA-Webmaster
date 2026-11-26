@@ -253,6 +253,27 @@
   box-shadow: 0 0 16px rgba(0, 255, 255, 0.3);
 }
 
+/* Prism: a gold ring that walks the spectrum. */
+.flair-halo {
+  border-radius: 999px;
+  padding: 1px;
+  background: conic-gradient(from 0deg, #ffffff, #ffd700, #87ceeb, #8f00ff, #ffffff);
+  animation: halo-hue 7s linear infinite;
+}
+
+.flair-halo > span {
+  display: block;
+  border-radius: 999px;
+  background: #05070a;
+  padding: 2px 8px;
+}
+
+@keyframes halo-hue {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
 /* Vault and drive taps: a short rise, never a slot machine. */
 @keyframes vault-in {
   from {
@@ -340,6 +361,24 @@
 
 .signal-wave-3 {
   animation-duration: 17s;
+}
+
+.quasar-drift {
+  transform-box: view-box;
+  transform-origin: 1010px 640px;
+  animation: quasar-drift 26s ease-in-out infinite;
+}
+
+@keyframes quasar-drift {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.03) rotate(2deg);
+    opacity: 1;
+  }
 }
 
 @keyframes signal-dash {

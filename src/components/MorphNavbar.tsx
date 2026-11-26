@@ -116,6 +116,7 @@ export function MorphNavbar() {
                 flair === "frame" && "flair-frame px-1.5 py-0.5",
                 flair === "ring" && "flair-ring",
                 flair === "horizon" && "flair-horizon",
+                flair === "halo" && "flair-halo",
               )}
             >
               <span
@@ -176,6 +177,7 @@ export function MorphNavbar() {
               flair === "frame" && "flair-frame px-1.5 py-0.5",
               flair === "ring" && "flair-ring",
               flair === "horizon" && "flair-horizon",
+              flair === "halo" && "flair-halo",
             )}
           >
             <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">

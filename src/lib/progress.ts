@@ -5,9 +5,10 @@ import {
   cosmeticsFor,
   dupeRefundFor,
   ECONOMY,
+  TIER_ORDER,
   levelSpan,
   ramFor,
-  tierForHits,
+  rollTier,
   xpFor,
   type Cosmetic,
   type CosmeticSlot,
@@ -258,7 +259,7 @@ function pickCosmetic(tier: Tier): Cosmetic {
  * settled in the same write so closing the screen mid-roll can't lose a reward.
  */
 export function buyDrive(): PurchaseOutcome {
-  const { cost, taps, tapChance } = ECONOMY.drive;
+  const { cost, taps } = ECONOMY.drive;
   const free = isTestMode();
 
   if (!scope) {
@@ -273,9 +274,15 @@ export function buyDrive(): PurchaseOutcome {
     };
   }
 
-  const results = Array.from({ length: taps }, () => Math.random() < tapChance);
-  const hits = results.filter(Boolean).length;
-  const tier = tierForHits(hits);
+  // The star is drawn from the published table first, then the taps are laid
+  // out to show it: 1★ is four holds, 5★ is four hits, in random positions.
+  const tier = rollTier();
+  const hits = TIER_ORDER.indexOf(tier);
+  const results = Array.from({ length: taps }, (_, index) => index < hits);
+  for (let index = results.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [results[index], results[swap]] = [results[swap], results[index]];
+  }
   const item = pickCosmetic(tier);
   const duplicate = Boolean(state.rewards[item.id]);
   const refund = duplicate ? dupeRefundFor(tier) : 0;
