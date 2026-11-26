@@ -1,6 +1,8 @@
 import { useEffect, useState, type MouseEvent } from "react";
-import { ArrowRight, Menu, X } from "lucide-react";
-import { requestAuth, useGuest } from "../lib/auth";
+import { ArrowRight, LogOut, Menu, X } from "lucide-react";
+import { getSession, requestAuth, signOut, useSession } from "../lib/auth";
+import { findAccount } from "../lib/accounts";
+import { useProgress } from "../lib/progress";
 import { announceSoon } from "../lib/soon";
 import { cn } from "../lib/cn";
 
@@ -14,10 +16,15 @@ const LINKS = [
 export function MorphNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const guest = useGuest();
+  const session = useSession();
+  const { level, xp, ram } = useProgress();
+
+  const handle =
+    session?.kind === "account" ? (findAccount(session.accountId)?.handle ?? "Account") : null;
+  const identity = handle ?? (session?.kind === "guest" ? "Guest" : "New");
 
   const startCourse = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (guest) return;
+    if (getSession()) return;
     event.preventDefault();
     requestAuth(() => {
       document.getElementById("units")?.scrollIntoView({ behavior: "smooth" });
@@ -80,9 +87,7 @@ export function MorphNavbar() {
                 )}
               >
                 {link.label}
-                {link.active && (
-                  <span className="absolute inset-x-3 -bottom-px h-px bg-brand" />
-                )}
+                {link.active && <span className="absolute inset-x-3 -bottom-px h-px bg-brand" />}
               </a>
             ) : (
               <button
@@ -98,37 +103,51 @@ export function MorphNavbar() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-4 border-l border-white/10 pl-5 lg:flex">
-          <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
-            {guest ? (
-              <span className="text-signal/90">Guest</span>
-            ) : (
-              <span>
-                LV <span className="text-ink">1</span>
-              </span>
-            )}
-            <span className="h-3 w-px bg-white/10" />
+          <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-[0.12em] text-dim uppercase">
+            <span className={cn(handle ? "text-ink" : "text-signal/90")}>{identity}</span>
+            <span aria-hidden="true" className="h-3 w-px bg-white/10" />
             <span>
-              <span className="text-ink">0</span> XP
+              LV <span className="text-ink">{level}</span>
+            </span>
+            <span aria-hidden="true" className="h-3 w-px bg-white/10" />
+            <span>
+              <span className="text-ink">{xp.toLocaleString()}</span> XP
+            </span>
+            <span aria-hidden="true" className="h-3 w-px bg-white/10" />
+            <span>
+              <span className="text-ink">{ram.toLocaleString()}</span> RAM
             </span>
           </div>
-          <a
-            href="#units"
-            onClick={startCourse}
-            className="inline-flex h-9 items-center gap-2 rounded-[3px] bg-brand px-4 text-[12.5px] font-medium text-white transition-colors hover:bg-[#7b00de]"
-          >
-            Start
-            <ArrowRight className="h-3.5 w-3.5" />
-          </a>
+
+          {session ? (
+            <button
+              type="button"
+              onClick={() => signOut()}
+              aria-label="Sign out"
+              className="grid h-9 w-9 place-items-center rounded-[3px] border border-white/15 text-dim transition-colors hover:bg-white/[0.05] hover:text-ink"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <a
+              href="#units"
+              onClick={startCourse}
+              className="inline-flex h-9 items-center gap-2 rounded-[3px] bg-brand px-4 text-[12.5px] font-medium text-white transition-colors hover:bg-[#7b00de]"
+            >
+              Start
+              <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          )}
         </div>
 
         <div className="ml-auto flex items-center gap-3 lg:hidden">
           <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
-            {guest ? (
-              <span className="text-signal/90">Guest</span>
-            ) : (
+            {session ? (
               <>
-                <span className="text-ink">0</span> XP
+                <span className="text-ink">{xp.toLocaleString()}</span> XP
               </>
+            ) : (
+              "New"
             )}
           </span>
           <button
@@ -169,6 +188,18 @@ export function MorphNavbar() {
                   {link.label}
                 </button>
               ),
+            )}
+            {session && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  signOut();
+                }}
+                className="block w-full py-3 text-left text-[14px] text-signal/90"
+              >
+                Sign out
+              </button>
             )}
           </nav>
         </div>

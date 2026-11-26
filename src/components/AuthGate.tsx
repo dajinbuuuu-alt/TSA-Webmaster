@@ -1,15 +1,24 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import { GATE_EVENT, continueAsGuest, type GateDetail } from "../lib/auth";
+import { signIn, signUp } from "../lib/accounts";
 import { cn } from "../lib/cn";
 
+type Mode = "create" | "login";
+
 /**
- * The account barrier in front of every lesson. There is no backend yet, so the
- * account buttons are honest about it and guest mode is what actually starts.
+ * The account barrier in front of every lesson. Accounts are real sign-up and
+ * sign-in with PBKDF2-hashed passwords, stored on this device until a server
+ * exists; guest mode writes its own separate progress.
  */
 export function AuthGate() {
   const [open, setOpen] = useState(false);
-  const [notice, setNotice] = useState(false);
+  const [mode, setMode] = useState<Mode>("create");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
   const panelRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
   const pending = useRef<(() => void) | undefined>(undefined);
@@ -18,7 +27,8 @@ export function AuthGate() {
     const onGate = (event: Event) => {
       pending.current = (event as CustomEvent<GateDetail>).detail?.next;
       restoreFocus.current = document.activeElement as HTMLElement | null;
-      setNotice(false);
+      setError(null);
+      setBusy(false);
       setOpen(true);
     };
 
@@ -39,7 +49,9 @@ export function AuthGate() {
       }
       if (event.key !== "Tab" || !panel) return;
 
-      const focusable = Array.from(panel.querySelectorAll<HTMLElement>("button"));
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>("button, input, [href]"),
+      );
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (!first || !last) return;
@@ -65,15 +77,34 @@ export function AuthGate() {
 
   function close() {
     setOpen(false);
+    setPassword("");
+    setError(null);
     restoreFocus.current?.focus?.();
   }
 
-  function enterAsGuest() {
-    continueAsGuest();
+  function finish() {
     setOpen(false);
+    setPassword("");
+    setBusy(false);
     const next = pending.current;
     pending.current = undefined;
     next?.();
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+
+    setBusy(true);
+    setError(null);
+    const result = mode === "create" ? await signUp(email, password) : await signIn(email, password);
+    setBusy(false);
+
+    if ("error" in result) {
+      setError(result.error);
+      return;
+    }
+    finish();
   }
 
   if (!open) return null;
@@ -92,7 +123,7 @@ export function AuthGate() {
         aria-modal="true"
         aria-labelledby="gate-title"
         aria-describedby="gate-body"
-        className="relative w-full max-w-[400px] rounded-[4px] border border-white/12 bg-[#0f1319] p-6 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)]"
+        className="relative w-full max-w-[420px] rounded-[4px] border border-white/12 bg-[#0f1319] p-6 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.9)]"
       >
         <div className="flex items-start justify-between gap-4">
           <p className="eyebrow">Session</p>
@@ -116,40 +147,98 @@ export function AuthGate() {
           Guest saves XP and RAM on this computer only.
         </p>
 
-        <div className="mt-6 space-y-2">
-          <button
-            type="button"
-            data-autofocus
-            onClick={() => setNotice(true)}
-            className="h-10 w-full rounded-[3px] bg-brand text-[13px] font-medium text-white transition-colors hover:bg-[#7b00de]"
+        <div className="mt-5 flex gap-1 border-b border-white/10">
+          {(["create", "login"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                setMode(option);
+                setError(null);
+              }}
+              aria-pressed={mode === option}
+              className={cn(
+                "relative px-3 py-2 text-[12.5px] transition-colors",
+                mode === option ? "text-ink" : "text-dim hover:text-ink",
+              )}
+            >
+              {option === "create" ? "Create account" : "Log in"}
+              {mode === option && <span className="absolute inset-x-2 -bottom-px h-px bg-brand" />}
+            </button>
+          ))}
+        </div>
+
+        <form onSubmit={submit} className="mt-4 space-y-3">
+          <label className="block">
+            <span className="font-mono text-[9.5px] tracking-[0.18em] text-dim uppercase">
+              Email
+            </span>
+            <input
+              data-autofocus
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="mt-1.5 h-10 w-full rounded-[3px] border border-white/12 bg-[#0b0e13] px-3 text-[13px] text-ink outline-none transition-colors focus:border-signal/60"
+            />
+          </label>
+
+          <label className="block">
+            <span className="font-mono text-[9.5px] tracking-[0.18em] text-dim uppercase">
+              Password
+            </span>
+            <input
+              type="password"
+              required
+              minLength={mode === "create" ? 8 : 1}
+              autoComplete={mode === "create" ? "new-password" : "current-password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="mt-1.5 h-10 w-full rounded-[3px] border border-white/12 bg-[#0b0e13] px-3 text-[13px] text-ink outline-none transition-colors focus:border-signal/60"
+            />
+          </label>
+
+          <p
+            aria-live="polite"
+            className={cn(
+              "min-h-5 text-[12px] leading-5 text-rose/90 transition-opacity",
+              error ? "opacity-100" : "opacity-0",
+            )}
           >
-            Create an account
-          </button>
+            {error ?? ""}
+          </p>
+
           <button
-            type="button"
-            onClick={() => setNotice(true)}
-            className="h-10 w-full rounded-[3px] border border-white/15 text-[13px] text-ink transition-colors hover:bg-white/[0.05]"
+            type="submit"
+            disabled={busy}
+            className="h-10 w-full rounded-[3px] bg-brand text-[13px] font-medium text-white transition-colors hover:bg-[#7b00de] disabled:opacity-70"
           >
-            Log in
+            {busy
+              ? mode === "create"
+                ? "Creating account…"
+                : "Signing in…"
+              : mode === "create"
+                ? "Create account"
+                : "Log in"}
           </button>
+        </form>
+
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.07] pt-3">
+          <span className="font-mono text-[9px] tracking-[0.16em] text-dim/60 uppercase">
+            Saved on this device
+          </span>
           <button
             type="button"
-            onClick={enterAsGuest}
-            className="h-10 w-full text-[13px] text-dim underline decoration-white/20 underline-offset-4 transition-colors hover:text-ink hover:decoration-white/50"
+            onClick={() => {
+              continueAsGuest();
+              finish();
+            }}
+            className="text-[12.5px] text-dim underline decoration-white/20 underline-offset-4 transition-colors hover:text-ink hover:decoration-white/50"
           >
             Continue as guest
           </button>
         </div>
-
-        <p
-          aria-live="polite"
-          className={cn(
-            "mt-3 text-[12px] leading-5 text-signal/80 transition-opacity",
-            notice ? "opacity-100" : "opacity-0",
-          )}
-        >
-          {notice ? "Accounts aren't open yet." : ""}
-        </p>
       </div>
     </div>
   );

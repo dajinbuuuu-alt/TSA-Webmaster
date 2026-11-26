@@ -5,10 +5,12 @@ import { DecryptText } from "./components/DecryptText";
 import { DottedGlow } from "./components/DottedGlow";
 import { LessonPreview } from "./components/LessonPreview";
 import { MorphNavbar } from "./components/MorphNavbar";
+import { RewardToast } from "./components/RewardToast";
 import { SoonToast } from "./components/SoonToast";
+import { StubBar } from "./components/StubBar";
 import { UnitCard } from "./components/UnitCard";
 import { TIER_GRADIENT, TIER_LABEL, UNITS } from "./data/units";
-import { isGuest, requestAuth } from "./lib/auth";
+import { getSession, requestAuth } from "./lib/auth";
 import { announceSoon } from "./lib/soon";
 
 const FACT_ROW = ["6 units", "About 2 hours", "No account", "Saved on device"];
@@ -30,7 +32,7 @@ export default function App() {
   const capstone = UNITS[6];
 
   const startUnit = () => {
-    if (isGuest()) {
+    if (getSession()) {
       announceSoon();
       return;
     }
@@ -38,7 +40,7 @@ export default function App() {
   };
 
   const startCourse = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (isGuest()) return;
+    if (getSession()) return;
     event.preventDefault();
     requestAuth(() => {
       document.getElementById("units")?.scrollIntoView({ behavior: "smooth" });
@@ -113,7 +115,10 @@ export default function App() {
               </div>
             </div>
 
-            <LessonPreview />
+            <div>
+              <LessonPreview />
+              <StubBar />
+            </div>
           </div>
         </section>
 
@@ -201,6 +206,7 @@ export default function App() {
       </main>
 
       <AuthGate />
+      <RewardToast />
       <SoonToast />
     </div>
   );

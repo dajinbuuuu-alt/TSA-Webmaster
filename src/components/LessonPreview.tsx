@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { DirectionAwareSelect, type SelectOption } from "./DirectionAwareSelect";
-import { isGuest, requestAuth } from "../lib/auth";
-import { announceSoon } from "../lib/soon";
+import { getSession, requestAuth } from "../lib/auth";
+import { ramFor, xpFor } from "../lib/economy";
+import { completeLesson } from "../lib/progress";
 import { cn } from "../lib/cn";
 
 type Option = {
@@ -39,6 +40,7 @@ const OPTIONS: Option[] = [
  */
 export function LessonPreview() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [awarded, setAwarded] = useState(false);
   const choice = OPTIONS.find((option) => option.id === selected) ?? null;
 
   const options: SelectOption[] = OPTIONS.map((option) => ({
@@ -54,10 +56,28 @@ export function LessonPreview() {
             : "muted",
   }));
 
-  const onContinue = () => {
-    if (isGuest()) announceSoon();
-    else requestAuth(announceSoon);
+  const award = () => {
+    completeLesson({
+      unitId: "unit-0",
+      lessonId: "lesson-1",
+      kind: "lesson",
+      score: choice?.correct ? 1 : 0,
+      total: 1,
+      firstTry: choice?.correct ?? false,
+    });
+    setAwarded(true);
   };
+
+  const onContinue = () => {
+    if (!getSession()) {
+      requestAuth(award);
+      return;
+    }
+    award();
+  };
+
+  const done = awarded;
+  const perfect = choice?.correct ?? false;
 
   return (
     <div className="w-full">
@@ -104,21 +124,21 @@ export function LessonPreview() {
 
         <div className="flex items-center justify-between border-t border-white/[0.06] px-5 py-3">
           <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
-            +50 XP · +10 RAM
+            +{xpFor("lesson", perfect)} XP · +{ramFor("lesson", perfect)} RAM
           </span>
           <button
             type="button"
-            onClick={selected ? onContinue : undefined}
-            disabled={!selected}
+            onClick={selected && !done ? onContinue : undefined}
+            disabled={!selected || done}
             className={cn(
               "inline-flex h-8 items-center gap-2 rounded-[3px] px-3.5 text-[12px] font-medium transition-colors",
-              selected
+              selected && !done
                 ? "bg-brand text-white hover:bg-[#7b00de]"
                 : "cursor-not-allowed bg-white/[0.05] text-dim/60",
             )}
           >
-            {selected ? "Continue" : "Choose an answer"}
-            {selected && <ArrowRight className="h-3.5 w-3.5" />}
+            {done ? "Counted" : selected ? "Continue" : "Choose an answer"}
+            {selected && !done && <ArrowRight className="h-3.5 w-3.5" />}
           </button>
         </div>
       </div>
