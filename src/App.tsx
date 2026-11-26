@@ -6,6 +6,7 @@ import { DecryptText } from "./components/DecryptText";
 import { DottedGlow } from "./components/DottedGlow";
 import { LessonPreview } from "./components/LessonPreview";
 import { MorphNavbar } from "./components/MorphNavbar";
+import { ProfilePanel } from "./components/ProfilePanel";
 import { RewardToast } from "./components/RewardToast";
 import { SoonToast } from "./components/SoonToast";
 import { StubBar } from "./components/StubBar";
@@ -226,6 +227,7 @@ export default function App() {
 
       <AuthGate />
       <VaultPanel />
+      <ProfilePanel />
       <RewardToast />
       <SoonToast />
     </div>

@@ -185,6 +185,30 @@ function derive(state: State) {
 
 let scope = scopeForSession();
 let state: State = load(scope);
+
+/**
+ * Test mode lets you wear things you never won. When it goes off — or a page
+ * loads with it off — those slots are emptied so nothing stays worn for free.
+ */
+function dropUnowned(): boolean {
+  const loadout = { ...state.loadout };
+  let dropped = false;
+  (Object.keys(loadout) as CosmeticSlot[]).forEach((slot) => {
+    const itemId = loadout[slot];
+    if (itemId && !state.rewards[itemId]) {
+      loadout[slot] = null;
+      dropped = true;
+    }
+  });
+  if (dropped) {
+    state = { ...state, loadout };
+    persist();
+  }
+  return dropped;
+}
+
+if (!isTestMode()) dropUnowned();
+
 let snapshot = derive(state);
 
 function emit() {
@@ -211,11 +235,19 @@ subscribeAuth(() => {
   if (next === scope) return;
   scope = next;
   state = load(scope);
+  if (!isTestMode()) dropUnowned();
   emit();
 });
 
-// Turning test mode on or off changes which cosmetics count as owned.
-subscribeTestMode(() => emit());
+// Turning test mode on or off changes which cosmetics count as owned — and
+// turning it off takes back anything that was only wearable because of it.
+let testModeWasOn = isTestMode();
+subscribeTestMode(() => {
+  const on = isTestMode();
+  if (testModeWasOn && !on) dropUnowned();
+  testModeWasOn = on;
+  emit();
+});
 
 export function getSnapshot() {
   return snapshot;

@@ -6,6 +6,7 @@ import { FLAIRS } from "../lib/cosmetics";
 import { useProgress } from "../lib/progress";
 import { useTestMode } from "../lib/testmode";
 import { announceSoon } from "../lib/soon";
+import { openProfile } from "../lib/profile";
 import { openVault } from "../lib/vault";
 import { cn } from "../lib/cn";
 
@@ -99,7 +100,7 @@ export function MorphNavbar() {
               <button
                 key={link.label}
                 type="button"
-                onClick={link.label === "Reward Vault" ? openVault : announceSoon}
+                onClick={link.label === "Reward Vault" ? openVault : link.label === "Profile" ? openProfile : announceSoon}
                 className="px-3 py-2 text-[13px] text-dim transition-colors hover:text-ink"
               >
                 {link.label}
@@ -110,9 +111,12 @@ export function MorphNavbar() {
 
         <div className="ml-auto hidden items-center gap-4 border-l border-white/10 pl-5 lg:flex">
           <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-[0.12em] text-dim uppercase">
-            <span
+            <button
+              type="button"
+              onClick={openProfile}
+              aria-label="Open profile"
               className={cn(
-                "inline-flex items-center",
+                "inline-flex items-center transition-opacity hover:opacity-80",
                 flair === "frame" && "flair-frame px-1.5 py-0.5",
                 flair === "ring" && "flair-ring",
                 flair === "horizon" && "flair-horizon",
@@ -126,7 +130,7 @@ export function MorphNavbar() {
               >
                 {identity}
               </span>
-            </span>
+            </button>
             <span aria-hidden="true" className="h-3 w-px bg-white/10" />
             <span>
               LV <span className={accentOn ? "accent-text" : "text-ink"}>{level}</span>
@@ -225,6 +229,7 @@ export function MorphNavbar() {
                   onClick={() => {
                     setMenuOpen(false);
                     if (link.label === "Reward Vault") openVault();
+                    else if (link.label === "Profile") openProfile();
                     else announceSoon();
                   }}
                   className="block w-full border-b border-white/[0.06] py-3 text-left text-[14px] text-dim"
