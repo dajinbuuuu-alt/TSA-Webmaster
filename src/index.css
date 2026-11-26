@@ -239,8 +239,8 @@
     #ffd700,
     #00ffff
   );
-  background-size: 360% 100%;
-  animation: ring 2.8s linear infinite;
+  background-size: 220% 100%;
+  animation: ring 3.4s linear infinite;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.18);
 }
 
