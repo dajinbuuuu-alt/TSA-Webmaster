@@ -1,6 +1,7 @@
 import type { MouseEvent } from "react";
 import { ArrowRight, Gift } from "lucide-react";
 import { AuthGate } from "./components/AuthGate";
+import { CosmeticsLayer } from "./components/CosmeticsLayer";
 import { DecryptText } from "./components/DecryptText";
 import { DottedGlow } from "./components/DottedGlow";
 import { LessonPreview } from "./components/LessonPreview";
@@ -66,9 +67,10 @@ export default function App() {
         className="grain pointer-events-none fixed inset-0 z-[2] opacity-[0.03] mix-blend-overlay"
       />
 
+      <CosmeticsLayer />
       <MorphNavbar />
 
-      <main id="main">
+      <main id="main" className="relative z-10">
         <section className="relative overflow-hidden border-b border-white/[0.06] pt-28 pb-14 lg:pt-36 lg:pb-20">
           <DottedGlow />
           <div className="relative mx-auto grid w-full max-w-[1180px] gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-16">

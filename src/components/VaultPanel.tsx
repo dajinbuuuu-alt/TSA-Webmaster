@@ -4,15 +4,25 @@ import { TIER_GRADIENT, TIER_LABEL, type Tier } from "../data/units";
 import {
   COSMETICS,
   ECONOMY,
+  SLOT_LABEL,
+  SLOT_ORDER,
   TIER_ORDER,
+  cosmeticById,
   cosmeticsFor,
   itemChance,
   tierChances,
   type Cosmetic,
   type CosmeticKind,
 } from "../lib/economy";
-import { buyDrive, useProgress, type DriveResult } from "../lib/progress";
+import {
+  buyDrive,
+  equipItem,
+  unequipSlot,
+  useProgress,
+  type DriveResult,
+} from "../lib/progress";
 import { showToast } from "../lib/toast";
+import { toggleTestMode, useTestMode } from "../lib/testmode";
 import { VAULT_EVENT } from "../lib/vault";
 import { DriveRoll } from "./DriveRoll";
 import { cn } from "../lib/cn";
@@ -26,12 +36,24 @@ const KIND_LABEL: Record<CosmeticKind, string> = {
   theme: "Theme",
 };
 
-function CosmeticCard({ item, owned, chance }: { item: Cosmetic; owned: boolean; chance: number }) {
+type CardProps = {
+  item: Cosmetic;
+  owned: boolean;
+  equipped: boolean;
+  chance: number;
+  onEquip: () => void;
+};
+
+function CosmeticCard({ item, owned, equipped, chance, onEquip }: CardProps) {
   return (
     <div
       className={cn(
         "relative flex flex-col gap-1.5 border p-3 transition-colors",
-        owned ? "border-white/15 bg-white/[0.035]" : "border-white/[0.07]",
+        equipped
+          ? "border-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
+          : owned
+            ? "border-white/15 bg-white/[0.035]"
+            : "border-white/[0.07]",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -63,11 +85,35 @@ function CosmeticCard({ item, owned, chance }: { item: Cosmetic; owned: boolean;
           </span>
         )}
       </div>
+
+      {owned && (
+        <button
+          type="button"
+          onClick={onEquip}
+          disabled={equipped}
+          className={cn(
+            "mt-1 h-7 w-full rounded-[2px] border text-[11px] transition-colors",
+            equipped
+              ? "cursor-default border-[var(--accent)]/50 text-[var(--accent)]"
+              : "border-white/15 text-ink hover:bg-white/[0.06]",
+          )}
+        >
+          {equipped ? "Equipped" : item.slots.length > 1 ? "Equip set" : "Equip"}
+        </button>
+      )}
     </div>
   );
 }
 
-function TierSection({ tier, rewards, odds }: { tier: Tier; rewards: Record<string, number>; odds: number }) {
+type SectionProps = {
+  tier: Tier;
+  rewards: Record<string, number>;
+  loadout: Record<string, string | null>;
+  odds: number;
+  onEquip: (itemId: string) => void;
+};
+
+function TierSection({ tier, rewards, loadout, odds, onEquip }: SectionProps) {
   const items = cosmeticsFor(tier);
   const owned = items.filter((item) => rewards[item.id]).length;
 
@@ -91,7 +137,9 @@ function TierSection({ tier, rewards, odds }: { tier: Tier; rewards: Record<stri
             key={item.id}
             item={item}
             owned={Boolean(rewards[item.id])}
+            equipped={item.slots.every((slot) => loadout[slot] === item.id)}
             chance={itemChance(item)}
+            onEquip={() => onEquip(item.id)}
           />
         ))}
       </div>
@@ -100,14 +148,15 @@ function TierSection({ tier, rewards, odds }: { tier: Tier; rewards: Record<stri
 }
 
 /**
- * The vault: buy a drive, watch four taps, see every cosmetic owned or locked.
- * Every number comes from `economy.ts`, and the live store keeps RAM and the
- * collection in sync the moment a drive resolves.
+ * The vault: buy a drive, watch four taps, equip what you own. Every number
+ * comes from `economy.ts`, and the live store keeps RAM, the collection and
+ * the worn loadout in sync.
  */
 export function VaultPanel() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState<DriveResult | null>(null);
-  const { ram, rewards, ownedCount } = useProgress();
+  const { ram, rewards, ownedCount, loadout } = useProgress();
+  const testMode = useTestMode();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
 
@@ -163,6 +212,10 @@ export function VaultPanel() {
     setResult(outcome.result);
   };
 
+  const equip = (itemId: string) => {
+    equipItem(itemId);
+  };
+
   if (!open) return null;
 
   const odds = tierChances();
@@ -179,8 +232,8 @@ export function VaultPanel() {
         aria-labelledby="vault-title"
         className="relative flex h-full w-full max-w-[1020px] flex-col border-white/12 bg-[#0b0e13] sm:h-auto sm:max-h-[88vh] sm:rounded-[4px] sm:border"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-white/[0.08] px-5 py-4">
-          <div>
+        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-5 py-4">
+          <div className="min-w-0">
             <p className="eyebrow">Reward vault</p>
             <h2
               id="vault-title"
@@ -195,11 +248,36 @@ export function VaultPanel() {
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                toggleTestMode();
+                showToast(
+                  testMode ? "Test mode off · drives cost RAM again" : "Test mode on · drives are free",
+                  "info",
+                );
+              }}
+              aria-pressed={testMode}
+              aria-label="Test mode — unlimited RAM"
+              title="Unlimited RAM for testing. Off by default."
+              className={cn(
+                "h-8 rounded-[3px] border px-2 font-mono text-[9px] tracking-[0.14em] uppercase transition-colors",
+                testMode
+                  ? "border-flare/50 text-flare"
+                  : "border-white/12 text-dim/70 hover:bg-white/[0.05] hover:text-ink",
+              )}
+            >
+              Test
+            </button>
+
             <div className="text-right">
               <p className="font-mono text-[9px] tracking-[0.16em] text-dim/60 uppercase">RAM</p>
-              <p className="font-mono text-[15px] text-ink">{ram.toLocaleString()}</p>
+              <p className={cn("font-mono text-[15px]", testMode ? "text-flare" : "text-ink")}>
+                {testMode ? "∞" : ram.toLocaleString()}
+              </p>
             </div>
+
             <button
               type="button"
               data-close
@@ -221,7 +299,7 @@ export function VaultPanel() {
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="font-mono text-[10px] tracking-[0.18em] text-dim uppercase">
-                      Hard Drive · {ECONOMY.drive.cost} RAM
+                      Hard Drive · {testMode ? "free in test mode" : `${ECONOMY.drive.cost} RAM`}
                     </p>
                     <p className="mt-1.5 text-[13px] text-ink">
                       {ECONOMY.drive.taps} free taps, {Math.round(ECONOMY.drive.tapChance * 100)}% each.
@@ -237,7 +315,7 @@ export function VaultPanel() {
                     onClick={buy}
                     className={cn(
                       "inline-flex h-10 shrink-0 items-center gap-2 rounded-[3px] px-4 text-[13px] font-medium transition-colors",
-                      shortfall > 0
+                      shortfall > 0 && !testMode
                         ? "border border-white/20 text-ink hover:bg-white/[0.05]"
                         : "bg-brand text-white hover:bg-[#7b00de]",
                     )}
@@ -246,7 +324,7 @@ export function VaultPanel() {
                   </button>
                 </div>
 
-                {shortfall > 0 && (
+                {shortfall > 0 && !testMode && (
                   <p className="mt-3 border-t border-white/[0.07] pt-2.5 text-[12px] text-flare/90">
                     {ram === 0 ? "No RAM yet" : `${ram} RAM`} — {shortfall} short of {ECONOMY.drive.cost}.
                     Finish a lesson to earn more.
@@ -254,8 +332,55 @@ export function VaultPanel() {
                 )}
               </div>
 
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {SLOT_ORDER.map((slot) => {
+                  const item = loadout[slot] ? cosmeticById(loadout[slot] as string) : null;
+                  return (
+                    <div
+                      key={slot}
+                      className={cn(
+                        "border p-2.5",
+                        item ? "border-white/15 bg-white/[0.03]" : "border-white/[0.07]",
+                      )}
+                    >
+                      <p className="font-mono text-[8.5px] tracking-[0.16em] text-dim/60 uppercase">
+                        {SLOT_LABEL[slot]}
+                      </p>
+                      <p
+                        className={cn(
+                          "mt-1 truncate text-[12px]",
+                          item ? "text-ink" : "text-dim/45",
+                        )}
+                      >
+                        {item?.name ?? "Empty"}
+                      </p>
+                      {item ? (
+                        <button
+                          type="button"
+                          onClick={() => unequipSlot(slot)}
+                          className="mt-1 font-mono text-[8.5px] tracking-[0.12em] text-dim uppercase underline decoration-white/20 underline-offset-2 hover:text-ink"
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <span className="mt-1 block font-mono text-[8.5px] tracking-[0.12em] text-dim/35 uppercase">
+                          None
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
               {TIER_ORDER.map((tier) => (
-                <TierSection key={tier} tier={tier} rewards={rewards} odds={odds[tier]} />
+                <TierSection
+                  key={tier}
+                  tier={tier}
+                  rewards={rewards}
+                  loadout={loadout}
+                  odds={odds[tier]}
+                  onEquip={equip}
+                />
               ))}
             </>
           )}

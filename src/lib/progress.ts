@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { UNITS, type Tier } from "../data/units";
 import {
+  cosmeticById,
   cosmeticsFor,
   dupeRefundFor,
   ECONOMY,
@@ -9,9 +10,11 @@ import {
   tierForHits,
   xpFor,
   type Cosmetic,
+  type CosmeticSlot,
   type RewardKind,
 } from "./economy";
 import { getSession, subscribeAuth } from "./auth";
+import { isTestMode } from "./testmode";
 import { showToast } from "./toast";
 
 export type Entry = {
@@ -33,6 +36,8 @@ export type DriveRecord = {
   at: number;
 };
 
+export type Loadout = Record<CosmeticSlot, string | null>;
+
 type State = {
   version: 1;
   completed: Record<string, Entry>;
@@ -41,7 +46,17 @@ type State = {
   rewards: Record<string, number>;
   /** Newest first, capped so storage can't grow without bound. */
   drives: DriveRecord[];
+  /** One equipped item per slot. */
+  loadout: Loadout;
 };
+
+const emptyLoadout = (): Loadout => ({
+  cursor: null,
+  trail: null,
+  background: null,
+  accent: null,
+  flair: null,
+});
 
 export type Completion = {
   unitId: string;
@@ -74,7 +89,14 @@ const VERSION = 1;
 const DRIVE_HISTORY = 40;
 const listeners = new Set<() => void>();
 
-const emptyState = (): State => ({ version: VERSION, completed: {}, ram: 0, rewards: {}, drives: [] });
+const emptyState = (): State => ({
+  version: VERSION,
+  completed: {},
+  ram: 0,
+  rewards: {},
+  drives: [],
+  loadout: emptyLoadout(),
+});
 
 function scopeForSession(): string | null {
   const session = getSession();
@@ -103,6 +125,7 @@ function load(key: string | null): State {
       ram: parsed.ram,
       rewards: parsed.rewards ?? {},
       drives: parsed.drives ?? [],
+      loadout: { ...emptyLoadout(), ...(parsed.loadout ?? {}) },
     };
   } catch {
     return emptyState();
@@ -131,6 +154,7 @@ function derive(state: State) {
     rewards: state.rewards,
     ownedCount: Object.keys(state.rewards).length,
     drives: state.drives,
+    loadout: state.loadout,
   };
 }
 
@@ -225,11 +249,12 @@ function pickCosmetic(tier: Tier): Cosmetic {
  */
 export function buyDrive(): PurchaseOutcome {
   const { cost, taps, tapChance } = ECONOMY.drive;
+  const free = isTestMode();
 
   if (!scope) {
     return { ok: false, error: "Pick an account or guest mode before buying a drive.", shortfall: cost };
   }
-  if (state.ram < cost) {
+  if (!free && state.ram < cost) {
     const shortfall = cost - state.ram;
     return {
       ok: false,
@@ -244,7 +269,7 @@ export function buyDrive(): PurchaseOutcome {
   const item = pickCosmetic(tier);
   const duplicate = Boolean(state.rewards[item.id]);
   const refund = duplicate ? dupeRefundFor(tier) : 0;
-  const ramAfter = state.ram - cost + refund;
+  const ramAfter = free ? state.ram : state.ram - cost + refund;
 
   const record: DriveRecord = {
     id: `drive-${Date.now()}-${Math.round(Math.random() * 1e4)}`,
@@ -266,8 +291,33 @@ export function buyDrive(): PurchaseOutcome {
   persist();
   emit();
 
-  showToast(`−${cost} RAM · drive opened`, "spend");
+  showToast(free ? "Test mode · drive opened, no RAM charged" : `−${cost} RAM · drive opened`, "spend");
   return { ok: true, result: { taps: results, hits, tier, item, duplicate, refund, ramAfter } };
+}
+
+/** Wear an owned cosmetic. Themes fill several slots at once. */
+export function equipItem(itemId: string): boolean {
+  if (!scope) return false;
+  const item = cosmeticById(itemId);
+  if (!item || !state.rewards[item.id]) return false;
+
+  const loadout = { ...state.loadout };
+  item.slots.forEach((slot) => {
+    loadout[slot] = item.id;
+  });
+
+  state = { ...state, loadout };
+  persist();
+  emit();
+  showToast(`Equipped ${item.name}`, "gain");
+  return true;
+}
+
+export function unequipSlot(slot: CosmeticSlot) {
+  if (!scope || !state.loadout[slot]) return;
+  state = { ...state, loadout: { ...state.loadout, [slot]: null } };
+  persist();
+  emit();
 }
 
 type StubTarget = Omit<Completion, "score" | "firstTry">;

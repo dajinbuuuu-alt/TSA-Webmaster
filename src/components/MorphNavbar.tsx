@@ -2,7 +2,9 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { ArrowRight, LogOut, Menu, X } from "lucide-react";
 import { getSession, requestAuth, signOut, useSession } from "../lib/auth";
 import { findAccount } from "../lib/accounts";
+import { FLAIRS } from "../lib/cosmetics";
 import { useProgress } from "../lib/progress";
+import { useTestMode } from "../lib/testmode";
 import { announceSoon } from "../lib/soon";
 import { openVault } from "../lib/vault";
 import { cn } from "../lib/cn";
@@ -18,7 +20,10 @@ export function MorphNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const session = useSession();
-  const { level, xp, ram } = useProgress();
+  const { level, xp, ram, loadout } = useProgress();
+  const testMode = useTestMode();
+  const flair = loadout.flair ? FLAIRS[loadout.flair] : null;
+  const accentOn = Boolean(loadout.accent);
 
   const handle =
     session?.kind === "account" ? (findAccount(session.accountId)?.handle ?? "Account") : null;
@@ -88,7 +93,7 @@ export function MorphNavbar() {
                 )}
               >
                 {link.label}
-                {link.active && <span className="absolute inset-x-3 -bottom-px h-px bg-brand" />}
+                {link.active &&                 <span className="accent-underline absolute inset-x-3 -bottom-px h-px" />}
               </a>
             ) : (
               <button
@@ -105,10 +110,25 @@ export function MorphNavbar() {
 
         <div className="ml-auto hidden items-center gap-4 border-l border-white/10 pl-5 lg:flex">
           <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-[0.12em] text-dim uppercase">
-            <span className={cn(handle ? "text-ink" : "text-signal/90")}>{identity}</span>
+            <span
+              className={cn(
+                "inline-flex items-center",
+                flair === "frame" && "flair-frame px-1.5 py-0.5",
+                flair === "ring" && "flair-ring",
+                flair === "horizon" && "flair-horizon",
+              )}
+            >
+              <span
+                className={cn(
+                  accentOn ? "accent-text" : handle ? "text-ink" : "text-signal/90",
+                )}
+              >
+                {identity}
+              </span>
+            </span>
             <span aria-hidden="true" className="h-3 w-px bg-white/10" />
             <span>
-              LV <span className="text-ink">{level}</span>
+              LV <span className={accentOn ? "accent-text" : "text-ink"}>{level}</span>
             </span>
             <span aria-hidden="true" className="h-3 w-px bg-white/10" />
             <span>
@@ -116,8 +136,16 @@ export function MorphNavbar() {
             </span>
             <span aria-hidden="true" className="h-3 w-px bg-white/10" />
             <span>
-              <span className="text-ink">{ram.toLocaleString()}</span> RAM
+              <span className={testMode ? "text-flare" : "text-ink"}>
+                {testMode ? "∞" : ram.toLocaleString()}
+              </span>{" "}
+              RAM
             </span>
+            {testMode && (
+              <span className="rounded-[2px] border border-flare/40 px-1 py-0.5 text-[8px] tracking-[0.16em] text-flare">
+                TEST
+              </span>
+            )}
           </div>
 
           {session ? (
@@ -142,14 +170,26 @@ export function MorphNavbar() {
         </div>
 
         <div className="ml-auto flex items-center gap-3 lg:hidden">
-          <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
-            {session ? (
-              <>
-                <span className="text-ink">{xp.toLocaleString()}</span> XP
-              </>
-            ) : (
-              "New"
+          <span
+            className={cn(
+              "inline-flex items-center",
+              flair === "frame" && "flair-frame px-1.5 py-0.5",
+              flair === "ring" && "flair-ring",
+              flair === "horizon" && "flair-horizon",
             )}
+          >
+            <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
+              {session ? (
+                <>
+                  <span className={testMode ? "text-flare" : "text-ink"}>
+                    {testMode ? "∞" : xp.toLocaleString()}
+                  </span>{" "}
+                  {testMode ? "RAM" : "XP"}
+                </>
+              ) : (
+                "New"
+              )}
+            </span>
           </span>
           <button
             type="button"

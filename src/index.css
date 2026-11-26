@@ -126,6 +126,169 @@
   }
 }
 
+/* Equipped cosmetics ride on these two variables. */
+:root {
+  --accent: #8f00ff;
+  --accent-soft: rgba(143, 0, 255, 0.35);
+}
+
+.accent-text {
+  color: var(--accent);
+}
+
+.accent-bg {
+  background-color: var(--accent);
+}
+
+.accent-underline {
+  background-color: var(--accent);
+}
+
+/* Backgrounds from the vault: one fixed layer behind everything. */
+.cosmic-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cosmic-circuit {
+  background-image:
+    linear-gradient(to right, rgba(0, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse at 68% 24%, black, transparent 70%);
+  mask-image: radial-gradient(ellipse at 68% 24%, black, transparent 70%);
+}
+
+.cosmic-orbit::before,
+.cosmic-orbit::after {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 66%;
+  width: 520px;
+  height: 520px;
+  margin: -260px;
+  border: 1px dashed rgba(255, 215, 0, 0.18);
+  border-radius: 50%;
+  animation: orbit 90s linear infinite;
+}
+
+.cosmic-orbit::after {
+  width: 760px;
+  height: 760px;
+  margin: -380px;
+  border-color: rgba(0, 255, 255, 0.1);
+  animation-duration: 140s;
+  animation-direction: reverse;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cosmic-horizon {
+  background: radial-gradient(
+    circle at 74% 20%,
+    rgba(0, 255, 255, 0.14),
+    rgba(143, 0, 255, 0.08) 34%,
+    transparent 64%
+  );
+}
+
+.cosmic-horizon::before {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 74%;
+  width: 560px;
+  height: 560px;
+  margin: -280px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  box-shadow:
+    inset 0 0 90px rgba(0, 255, 255, 0.16),
+    0 0 70px rgba(0, 255, 255, 0.12);
+  animation: horizon 9s ease-in-out infinite;
+}
+
+@keyframes horizon {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+.cosmic-signal::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 200px;
+  background: repeating-linear-gradient(90deg, rgba(0, 255, 255, 0.32) 0 1px, transparent 1px 16px);
+  -webkit-mask-image: linear-gradient(to top, black, transparent);
+  mask-image: linear-gradient(to top, black, transparent);
+  animation: signal 7s linear infinite;
+}
+
+@keyframes signal {
+  to {
+    background-position: 16px 0;
+  }
+}
+
+/* Flair sits on the identity chip in the navbar. */
+.flair-frame {
+  border: 1px solid var(--accent);
+  animation: flair 5s ease-in-out infinite;
+}
+
+@keyframes flair {
+  0%,
+  100% {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--accent-soft);
+  }
+}
+
+.flair-ring {
+  padding: 1px;
+  background: linear-gradient(90deg, #00ffff, #8f00ff, #b76e79, #ffd700, #00ffff);
+  background-size: 300% 100%;
+  animation: ring 4s linear infinite;
+}
+
+.flair-ring > span {
+  display: block;
+  background: #05070a;
+  padding: 2px 7px;
+}
+
+@keyframes ring {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+.flair-horizon {
+  border: 1px solid rgba(0, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 2px 9px;
+  box-shadow: 0 0 16px rgba(0, 255, 255, 0.3);
+}
+
 /* Vault and drive taps: a short rise, never a slot machine. */
 @keyframes vault-in {
   from {
