@@ -478,16 +478,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* A CSS animation can be stopped; a GIF cannot, so hand those people the
-     still photographs instead. */
-  .cosmic-horizon {
-    background-image: url("./assets/event-horizon.jpg");
-  }
-
-  .cosmic-quasar {
-    background-image: url("./assets/quasar.jpg");
-  }
-
   *,
   *::before,
   *::after {
@@ -645,6 +635,19 @@
   background: var(--bg-color, #ffb066);
   mix-blend-mode: color;
   opacity: 0.3;
+}
+
+/* A CSS animation can be stopped; a GIF cannot, so serve the still photographs
+   to anyone who asked for less motion. This has to come after the backdrops
+   above, or the shortcut rules lose the cascade. */
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-horizon {
+    background-image: url("./assets/event-horizon.jpg");
+  }
+
+  .cosmic-quasar {
+    background-image: url("./assets/quasar.jpg");
+  }
 }
 
 /* ---------- Opening a drive ---------- */
