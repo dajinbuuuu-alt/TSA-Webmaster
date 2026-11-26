@@ -478,6 +478,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* A CSS animation can be stopped; a GIF cannot, so hand those people the
+     still photographs instead. */
+  .cosmic-horizon {
+    background-image: url("./assets/event-horizon.jpg");
+  }
+
+  .cosmic-quasar {
+    background-image: url("./assets/quasar.jpg");
+  }
+
   *,
   *::before,
   *::after {
@@ -543,10 +553,9 @@
 
 .cosmic-horizon {
   background-color: #000;
-  background-image: url("./assets/event-horizon.jpg");
-  transform-origin: 66% 22%;
-  animation: horizon-breathe 18s ease-in-out infinite;
-  will-change: transform;
+  /* Real motion: the disk is remapped frame by frame into a looping GIF, so the
+     gas orbits instead of the whole photo just swelling. */
+  background-image: url("./assets/event-horizon-spin.gif");
   background-position: 66% 16%;
   background-size: cover;
   opacity: 0.92;
@@ -576,40 +585,12 @@
   background: var(--bg-color, #ff8a3d);
   mix-blend-mode: color;
   opacity: 0.5;
-  animation: horizon-glow 9s ease-in-out infinite;
-}
-
-/* The photo can't physically swirl, so it breathes and brightens instead: slow
-   enough to feel like the disk is turning, small enough to stay sharp. */
-@keyframes horizon-breathe {
-  0%,
-  100% {
-    transform: scale(1) rotate(0deg);
-    filter: brightness(1);
-  }
-  50% {
-    transform: scale(1.06) rotate(0.8deg);
-    filter: brightness(1.12);
-  }
-}
-
-@keyframes horizon-glow {
-  0%,
-  100% {
-    opacity: 0.44;
-  }
-  50% {
-    opacity: 0.6;
-  }
 }
 
 /* Prism's 5-star backdrop: a quasar photo, tinted at runtime. */
 .cosmic-quasar {
   background-color: #000;
-  background-image: url("./assets/quasar.jpg");
-  transform-origin: 52% 46%;
-  animation: quasar-breathe 15s ease-in-out infinite;
-  will-change: transform;
+  background-image: url("./assets/quasar-spin.gif");
   background-position: 64% 50%;
   background-size: cover;
   opacity: 0.94;
@@ -664,29 +645,6 @@
   background: var(--bg-color, #ffb066);
   mix-blend-mode: color;
   opacity: 0.3;
-  animation: quasar-pulse 10s ease-in-out infinite;
-}
-
-@keyframes quasar-breathe {
-  0%,
-  100% {
-    transform: scale(1) translate3d(0, 0, 0) rotate(0deg);
-    filter: brightness(1) saturate(1);
-  }
-  50% {
-    transform: scale(1.05) translate3d(1.4%, -1%, 0) rotate(-0.6deg);
-    filter: brightness(1.1) saturate(1.1);
-  }
-}
-
-@keyframes quasar-pulse {
-  0%,
-  100% {
-    opacity: 0.26;
-  }
-  50% {
-    opacity: 0.38;
-  }
 }
 
 /* ---------- Opening a drive ---------- */
