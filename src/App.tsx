@@ -76,12 +76,12 @@ export default function App() {
           <DottedGlow />
           <div className="relative mx-auto grid w-full max-w-[1180px] gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-16">
             <div>
-              <p className="eyebrow flex items-center gap-2.5">
+              <p className="eyebrow hero-shadow flex items-center gap-2.5">
                 <span className="inline-block h-[6px] w-[6px] bg-signal" />
                 TSA Webmaster · AI literacy portal
               </p>
 
-              <h1 className="mt-6 font-display text-[clamp(2.4rem,5.1vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-ink">
+              <h1 className="hero-shadow mt-6 font-display text-[clamp(2.4rem,5.1vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-ink">
                 Learn how AI{" "}
                 <span className="underline decoration-signal/50 decoration-[2px] underline-offset-[10px]">
                   actually
@@ -89,7 +89,7 @@ export default function App() {
                 works.
               </h1>
 
-              <p className="mt-6 max-w-[46ch] text-[15px] leading-7 text-dim">
+              <p className="hero-shadow mt-6 max-w-[46ch] text-[15px] leading-7 text-dim">
                 Six units on how AI works and where it fails, for grades 9–12.
               </p>
 
@@ -111,7 +111,7 @@ export default function App() {
                 </a>
               </div>
 
-              <div className="mt-10 flex flex-wrap items-center gap-3 font-mono text-[10px] tracking-[0.14em] text-dim/70 uppercase">
+              <div className="hero-shadow mt-10 flex flex-wrap items-center gap-3 font-mono text-[10px] tracking-[0.14em] text-ink/70 uppercase max-sm:-mx-2 max-sm:rounded-[2px] max-sm:bg-black/45 max-sm:px-2 max-sm:py-2">
                 {FACT_ROW.map((fact, index) => (
                   <span key={fact} className="flex items-center gap-3">
                     {index > 0 && (

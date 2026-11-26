@@ -544,11 +544,38 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    #000 0%,
-    rgba(0, 0, 0, 0.86) 22%,
-    rgba(0, 0, 0, 0.44) 44%,
-    transparent 63%
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.88) 24%,
+    rgba(0, 0, 0, 0.62) 40%,
+    rgba(0, 0, 0, 0.3) 48%,
+    transparent 57%
   );
+}
+
+.hero-shadow {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 2px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* At tablet-landscape widths the card and copy share the row, so pull the core
+   behind the card instead of behind the headline. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .cosmic-quasar {
+    background-position: 26% 50%;
+  }
+
+  /* The copy takes a bigger share of the row here, so hold it darker longer. */
+  .cosmic-quasar::before {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.9) 42%,
+      rgba(0, 0, 0, 0.72) 53%,
+      rgba(0, 0, 0, 0.34) 61%,
+      transparent 69%
+    );
+  }
 }
 
 .cosmic-quasar::after {
@@ -787,17 +814,20 @@
   }
 
   .cosmic-quasar {
-    background-position: 56% 42%;
-    opacity: 0.82;
+    background-position: 56% 38%;
+    opacity: 0.84;
   }
 
   .cosmic-quasar::before {
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.8) 0%,
-      rgba(0, 0, 0, 0.52) 40%,
-      #000 96%
-    );
+    background:
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.82) 32%,
+        rgba(0, 0, 0, 0.64) 52%,
+        rgba(0, 0, 0, 0.34) 68%,
+        #000 96%
+      );
   }
 
   .cosmic-quasar::after {
