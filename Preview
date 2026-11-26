@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Synapse — AI Literacy Portal</title>
+    <meta name="description" content="A gamified AI literacy course for grades 9–12." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --void: #000000;
+        --panel: #0b0e13;
+        --ink: #eaf1f8;
+        --dim: #8b98a5;
+        --brand: #8f00ff;
+        --signal: #00ffff;
+        --rose: #b76e79;
+        --hair: rgba(255, 255, 255, 0.06);
+        --display: "Archivo", "Inter", system-ui, sans-serif;
+        --body: "Inter", system-ui, -apple-system, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--void);
+        color: var(--ink);
+        font-family: var(--body);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      h1, h2, h3 { font-family: var(--display); margin: 0; }
+      p { margin: 0; }
+      a { color: inherit; text-decoration: none; }
+      ::selection { background: var(--brand); color: #fff; }
+      :focus-visible { outline: 1px solid var(--signal); outline-offset: 3px; }
+
+      .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--dim);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .dot { width: 6px; height: 6px; background: var(--signal); display: inline-block; }
+
+      /* ---------- nav ---------- */
+      .nav {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 50;
+        border-bottom: 1px solid transparent;
+        transition: background 0.3s, border-color 0.3s;
+      }
+      .nav.scrolled {
+        background: rgba(0, 0, 0, 0.85);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        height: 64px;
+      }
+      .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+      .brand span {
+        font-family: var(--display);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+      }
+      .brand small {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        color: var(--dim);
+        text-transform: uppercase;
+        padding-left: 10px;
+        border-left: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .links { margin-left: auto; display: flex; gap: 4px; }
+      .links a, .links button {
+        font: inherit;
+        font-size: 13px;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        color: var(--dim);
+        padding: 8px 12px;
+        position: relative;
+      }
+      .links a:hover, .links button:hover, .links .on { color: var(--ink); }
+      .links .on::after {
+        content: "";
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: -1px;
+        height: 1px;
+        background: var(--brand);
+      }
+      .cluster {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        padding-left: 20px;
+      }
+      .stat {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+        display: flex;
+        gap: 12px;
+      }
+      .stat b { color: var(--ink); font-weight: 500; }
+      .stat .guest { color: rgba(0, 255, 255, 0.9); }
+      .start {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 3px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 500;
+        border: 0;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .start:hover { background: #7b00de; }
+      .menu-btn {
+        display: none;
+        height: 36px;
+        width: 36px;
+        place-items: center;
+        border-radius: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: none;
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--hair);
+        padding: 112px 0 56px;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle, rgba(234, 241, 248, 0.13) 1px, transparent 1px);
+        background-size: 22px 22px;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 75%);
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 45% 40% at 18% 12%, rgba(143, 0, 255, 0.22), transparent 70%),
+          radial-gradient(ellipse 40% 35% at 78% 25%, rgba(0, 255, 255, 0.12), transparent 70%);
+        pointer-events: none;
+      }
+      .hero-grid {
+        position: relative;
+        display: grid;
+        gap: 48px;
+        align-items: center;
+      }
+      h1 {
+        margin-top: 24px;
+        font-size: clamp(2.4rem, 5.1vw, 4.25rem);
+        line-height: 1.02;
+        font-weight: 600;
+        letter-spacing: -0.035em;
+      }
+      h1 u {
+        text-decoration-color: rgba(0, 255, 255, 0.5);
+        text-decoration-thickness: 2px;
+        text-underline-offset: 10px;
+      }
+      .sub {
+        margin-top: 24px;
+        max-width: 46ch;
+        font-size: 15px;
+        line-height: 1.75;
+        color: var(--dim);
+      }
+      .cta { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
+      .cta .big {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 3px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 500;
+      }
+      .cta .big:hover { background: #7b00de; }
+      .cta .big em {
+        font-family: var(--mono);
+        font-style: normal;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .cta .quiet {
+        font-size: 13.5px;
+        color: rgba(234, 241, 248, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 2px;
+      }
+      .facts {
+        margin-top: 40px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(139, 152, 165, 0.7);
+      }
+      .facts span { display: flex; align-items: center; gap: 12px; }
+      .facts span + span::before {
+        content: "";
+        width: 1px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      /* ---------- lesson card ---------- */
+      .lesson {
+        background: #0f1319;
+        border: 1px solid rgba(54, 69, 79, 0.8);
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px -50px rgba(0, 0, 0, 0.9);
+      }
+      .bar { height: 2px; background: rgba(255, 255, 255, 0.06); }
+      .bar i { display: block; height: 100%; width: 33.33%; background: var(--signal); }
+      .lesson-head, .lesson-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+      }
+      .lesson-head { border-bottom: 1px solid var(--hair); }
+      .lesson-foot { border-top: 1px solid var(--hair); }
+      .mono {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .lesson-body { padding: 20px; }
+      .question { font-size: 13.5px; line-height: 1.7; }
+
+      .choices { position: relative; margin-top: 16px; display: grid; gap: 8px; }
+      .choice {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        overflow: hidden;
+        text-align: left;
+        padding: 10px 12px;
+        border-radius: 3px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.02);
+        color: rgba(234, 241, 248, 0.85);
+        font: inherit;
+        font-size: 12.5px;
+        line-height: 1.6;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s, color 0.2s;
+      }
+      .choice:hover { border-color: rgba(255, 255, 255, 0.25); }
+      .choice[disabled] { cursor: default; }
+      .choice .fill {
+        position: absolute;
+        inset: 0;
+        background: rgba(234, 241, 248, 0.05);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .choice .key {
+        position: relative;
+        margin-top: 2px;
+        display: grid;
+        place-items: center;
+        height: 20px;
+        width: 20px;
+        flex-shrink: 0;
+        border-radius: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--dim);
+      }
+      .choice .label { position: relative; }
+      .choice.correct { border-color: rgba(0, 255, 255, 0.5); background: rgba(0, 255, 255, 0.06); color: var(--ink); }
+      .choice.correct .key { border-color: rgba(0, 255, 255, 0.6); color: var(--signal); }
+      .choice.wrong { border-color: rgba(183, 110, 121, 0.5); background: rgba(183, 110, 121, 0.07); color: rgba(234, 241, 248, 0.9); }
+      .choice.wrong .key { border-color: rgba(183, 110, 121, 0.6); color: var(--rose); }
+      .choice.muted { border-color: rgba(255, 255, 255, 0.05); color: rgba(139, 152, 165, 0.6); }
+
+      .sel-frame {
+        position: absolute;
+        z-index: 10;
+        pointer-events: none;
+        border: 1px solid rgba(0, 255, 255, 0.7);
+        opacity: 0;
+        transition: top 0.2s ease-out, left 0.2s ease-out, width 0.2s ease-out,
+          height 0.2s ease-out, opacity 0.15s;
+      }
+      .sel-frame.on { opacity: 1; }
+      .sel-frame.wrong { border-color: rgba(183, 110, 121, 0.7); }
+      .sel-frame i {
+        position: absolute;
+        height: 5px;
+        width: 5px;
+        background: #0f1319;
+        border: 1px solid rgba(0, 255, 255, 0.7);
+      }
+      .sel-frame.wrong i { border-color: rgba(183, 110, 121, 0.7); }
+      .sel-frame i:nth-child(1) { top: -3px; left: -3px; }
+      .sel-frame i:nth-child(2) { top: -3px; right: -3px; }
+      .sel-frame i:nth-child(3) { bottom: -3px; left: -3px; }
+      .sel-frame i:nth-child(4) { bottom: -3px; right: -3px; }
+      .sel-frame span {
+        position: absolute;
+        top: -15px;
+        right: 0;
+        font-family: var(--mono);
+        font-size: 8.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(0, 255, 255, 0.7);
+        white-space: nowrap;
+      }
+      .sel-frame.wrong span { color: rgba(183, 110, 121, 0.75); }
+
+      @keyframes fill-left { from { transform: translate3d(-100%, 0, 0); } to { transform: none; } }
+      @keyframes fill-right { from { transform: translate3d(100%, 0, 0); } to { transform: none; } }
+      @keyframes fill-top { from { transform: translate3d(0, -100%, 0); } to { transform: none; } }
+      @keyframes fill-bottom { from { transform: translate3d(0, 100%, 0); } to { transform: none; } }
+
+      .feedback {
+        margin-top: 16px;
+        border-left: 2px solid rgba(0, 255, 255, 0.6);
+        padding-left: 12px;
+        font-size: 12px;
+        line-height: 1.7;
+        color: var(--dim);
+        display: none;
+      }
+      .feedback.on { display: block; }
+      .feedback.wrong { border-left-color: rgba(183, 110, 121, 0.6); }
+      .feedback b { color: var(--signal); font-weight: 500; }
+      .feedback.wrong b { color: var(--rose); }
+      .go {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 32px;
+        padding: 0 14px;
+        border-radius: 3px;
+        border: 0;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(139, 152, 165, 0.6);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: not-allowed;
+      }
+      .go.ready { background: var(--brand); color: #fff; cursor: pointer; }
+      .go.ready:hover { background: #7b00de; }
+
+      /* ---------- curriculum ---------- */
+      section.units { border-bottom: 1px solid var(--hair); padding: 64px 0; }
+      .units-head { display: flex; flex-direction: column; gap: 24px; }
+      h2 {
+        margin-top: 12px;
+        font-size: clamp(1.9rem, 3.4vw, 2.75rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+      .units-sub { margin-top: 12px; font-size: 13.5px; line-height: 1.7; color: var(--dim); }
+      .tiers { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+      .tiers div { display: flex; align-items: center; gap: 8px; }
+      .tiers i { width: 28px; height: 2px; display: block; }
+      .tiers span {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .grid { margin-top: 36px; display: grid; gap: 12px; }
+      .unit {
+        position: relative;
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      .unit:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 24px 60px -45px rgba(143, 0, 255, 0.8);
+      }
+      .unit::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 2px;
+        background: var(--rule);
+      }
+      .unit-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+      .unit h3 { margin-top: 16px; font-size: 19px; line-height: 1.2; font-weight: 500; letter-spacing: -0.015em; }
+      .unit p { margin-top: 8px; font-size: 13px; line-height: 1.7; color: var(--dim); max-width: 46ch; }
+      .unit-foot {
+        margin-top: 20px;
+        padding-top: 12px;
+        border-top: 1px solid var(--hair);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .unit-foot .state { font-size: 12px; color: rgba(139, 152, 165, 0.5); }
+      .unit-foot button {
+        font: inherit;
+        font-size: 12px;
+        background: none;
+        border: 0;
+        color: var(--ink);
+        cursor: pointer;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        padding: 0;
+      }
+      .unit.capstone { grid-column: 1 / -1; }
+      .t-bronze { --rule: linear-gradient(90deg, #cd7f32 0%, #7a4a1c 100%); }
+      .t-rose { --rule: linear-gradient(90deg, #b76e79 0%, #6f3a43 100%); }
+      .t-gold { --rule: linear-gradient(90deg, #ffd700 0%, #9a7b00 100%); }
+
+      /* ---------- progress ---------- */
+      section.progress { padding: 56px 0; border-bottom: 1px solid var(--hair); }
+      .prog-grid { margin-top: 28px; display: grid; gap: 32px; }
+      .prog { border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px; }
+      .prog .kicker {
+        display: flex;
+        gap: 12px;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(139, 152, 165, 0.7);
+      }
+      .prog h3 { margin-top: 8px; font-size: 15px; font-weight: 500; }
+      .bars { margin-top: 16px; display: flex; gap: 6px; }
+      .bars i { height: 6px; width: 32px; display: block; }
+
+      footer { padding: 32px 0; }
+      .foot {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        justify-content: space-between;
+      }
+      .foot .mark { display: flex; align-items: center; gap: 10px; }
+      .foot .mark i { width: 6px; height: 6px; background: var(--brand); display: block; }
+      .foot .mark span {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .foot .meta {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(139, 152, 165, 0.6);
+      }
+
+      /* ---------- gate ---------- */
+      .gate {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .gate.open { display: flex; }
+      .gate .scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(3px); }
+      .panel {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        background: #0f1319;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 4px;
+        padding: 24px;
+        box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+      }
+      .panel-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+      .panel h2 { margin-top: 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+      .panel p { margin-top: 8px; font-size: 13px; line-height: 1.7; color: var(--dim); }
+      .panel .actions { margin-top: 24px; display: grid; gap: 8px; }
+      .panel .actions button { font: inherit; font-size: 13px; height: 40px; border-radius: 3px; cursor: pointer; }
+      .panel .primary { background: var(--brand); color: #fff; border: 0; font-weight: 500; }
+      .panel .primary:hover { background: #7b00de; }
+      .panel .secondary { background: none; border: 1px solid rgba(255, 255, 255, 0.15); color: var(--ink); }
+      .panel .secondary:hover { background: rgba(255, 255, 255, 0.05); }
+      .panel .ghost {
+        background: none;
+        border: 0;
+        color: var(--dim);
+        text-decoration: underline;
+        text-decoration-color: rgba(255, 255, 255, 0.2);
+        text-underline-offset: 4px;
+      }
+      .panel .ghost:hover { color: var(--ink); }
+      .panel .x {
+        background: none;
+        border: 0;
+        color: var(--dim);
+        cursor: pointer;
+        height: 28px;
+        width: 28px;
+        font-size: 16px;
+        line-height: 1;
+        margin: -4px -4px 0 0;
+      }
+      .panel .x:hover { color: var(--ink); }
+      .notice {
+        margin-top: 12px;
+        min-height: 20px;
+        font-size: 12px;
+        line-height: 1.7;
+        color: rgba(0, 255, 255, 0.8);
+      }
+
+      /* ---------- toast ---------- */
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        z-index: 60;
+        transform: translate(-50%, 12px);
+        opacity: 0;
+        transition: opacity 0.3s, transform 0.3s;
+        pointer-events: none;
+        background: #0f1319;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+        padding: 10px 16px;
+        font-size: 12px;
+        color: rgba(234, 241, 248, 0.85);
+      }
+      .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+      @media (min-width: 640px) {
+        .wrap { padding: 0 32px; }
+        .hero { padding: 144px 0 80px; }
+        .grid { grid-template-columns: 1fr 1fr; }
+        .units { padding: 80px 0; }
+        .units-head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+        .foot { flex-direction: row; align-items: center; }
+      }
+
+      @media (min-width: 1024px) {
+        .hero-grid { grid-template-columns: minmax(0, 1fr) 400px; gap: 64px; }
+        .grid { grid-template-columns: repeat(3, 1fr); }
+        .unit.capstone { grid-column: span 3; flex-direction: row; align-items: center; gap: 40px; padding: 28px; }
+        .unit.capstone .unit-top { flex-direction: column; align-items: flex-start; gap: 4px; width: 128px; flex-shrink: 0; }
+        .unit.capstone .body { flex: 1; }
+        .unit.capstone h3 { margin-top: 0; font-size: 24px; }
+        .unit.capstone p { max-width: 62ch; }
+        .unit.capstone .unit-foot { margin-top: 0; border-top: 0; padding-top: 0; width: 176px; flex-shrink: 0; }
+        .prog-grid { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+      }
+
+      @media (max-width: 1023px) {
+        .links, .cluster { display: none; }
+        .menu-btn { display: grid; margin-left: auto; }
+        .sheet { display: none; border-top: 1px solid rgba(255, 255, 255, 0.08); background: #000; }
+        .sheet.open { display: block; }
+        .sheet a, .sheet button {
+          display: block;
+          width: 100%;
+          text-align: left;
+          background: none;
+          border: 0;
+          border-bottom: 1px solid var(--hair);
+          color: var(--dim);
+          font: inherit;
+          font-size: 14px;
+          padding: 12px 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav" id="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="mark" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#00FFFF" />
+                <stop offset="1" stop-color="#8F00FF" />
+              </linearGradient>
+            </defs>
+            <path d="M16 2.6 27.7 9.3v13.4L16 29.4 4.3 22.7V9.3z" stroke="url(#mark)" stroke-width="1.8" />
+            <circle cx="16" cy="16" r="3" fill="url(#mark)" />
+          </svg>
+          <span>SYNAPSE</span>
+          <small>AI literacy</small>
+        </a>
+
+        <nav class="links" aria-label="Primary">
+          <a href="#units" class="on">Units</a>
+          <button type="button" data-soon>Leaderboard</button>
+          <button type="button" data-soon>Reward Vault</button>
+          <button type="button" data-soon>Profile</button>
+        </nav>
+
+        <div class="cluster">
+          <div class="stat" data-stat>LV <b>1</b></div>
+          <a class="start" href="#units" data-start>Start</a>
+        </div>
+
+        <button class="menu-btn" type="button" id="menu" aria-expanded="false" aria-label="Open menu">☰</button>
+      </div>
+      <div class="sheet" id="sheet">
+        <div class="wrap">
+          <a href="#units">Units</a>
+          <button type="button" data-soon>Leaderboard</button>
+          <button type="button" data-soon>Reward Vault</button>
+          <button type="button" data-soon>Profile</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="eyebrow"><span class="dot"></span>TSA Webmaster · AI literacy portal</p>
+            <h1>Learn how AI <u>actually</u> works.</h1>
+            <p class="sub">Six units on how AI works and where it fails, for grades 9–12.</p>
+
+            <div class="cta">
+              <a class="big" href="#units" data-start>Start Unit 0 <em>2 MIN</em> →</a>
+              <a class="quiet" href="#units">See the full curriculum</a>
+            </div>
+
+            <div class="facts">
+              <span>6 units</span>
+              <span>About 2 hours</span>
+              <span>No account</span>
+              <span>Saved on device</span>
+            </div>
+          </div>
+
+          <div class="lesson">
+            <div class="bar"><i></i></div>
+            <div class="lesson-head">
+              <span class="mono">Unit 0 · Lesson 1 of 3</span>
+              <span class="mono">2 min</span>
+            </div>
+            <div class="lesson-body">
+              <p class="question">A model answers your homework question perfectly. What did it just do?</p>
+
+              <div class="choices" data-choices>
+                <div class="sel-frame" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i>
+                  <span data-size>0 × 0</span>
+                </div>
+                <button class="choice" type="button" data-id="a" data-correct="false">
+                  <span class="fill"></span><span class="key">A</span>
+                  <span class="label">Searched the web for the answer</span>
+                </button>
+                <button class="choice" type="button" data-id="b" data-correct="true">
+                  <span class="fill"></span><span class="key">B</span>
+                  <span class="label">Predicted the next word from its training data</span>
+                </button>
+                <button class="choice" type="button" data-id="c" data-correct="false">
+                  <span class="fill"></span><span class="key">C</span>
+                  <span class="label">Looked it up in a database of websites</span>
+                </button>
+              </div>
+
+              <p class="feedback" data-feedback></p>
+            </div>
+            <div class="lesson-foot">
+              <span class="mono">+50 XP · +10 RAM</span>
+              <button class="go" type="button" data-continue disabled>Choose an answer</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="units" id="units">
+        <div class="wrap">
+          <div class="units-head">
+            <div>
+              <p class="eyebrow">Curriculum</p>
+              <h2>The path</h2>
+              <p class="units-sub">Finish one unit to unlock the next.</p>
+            </div>
+            <div class="tiers">
+              <div><i style="background:linear-gradient(90deg,#cd7f32,#7a4a1c)"></i><span>Bronze · Units 0–1</span></div>
+              <div><i style="background:linear-gradient(90deg,#b76e79,#6f3a43)"></i><span>Rose Gold · Units 2–3</span></div>
+              <div><i style="background:linear-gradient(90deg,#ffd700,#9a7b00)"></i><span>Gold · Units 4–5</span></div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <article class="unit t-bronze">
+              <div class="unit-top"><span class="mono">Unit 00</span><span class="mono">2 min</span></div>
+              <div class="body">
+                <h3>How AI Works</h3>
+                <p>What a model is, and why it sounds confident.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">3 lessons</span><button type="button" data-start>Start ↗</button></div>
+            </article>
+
+            <article class="unit t-bronze">
+              <div class="unit-top"><span class="mono">Unit 01</span><span class="mono">5 min</span></div>
+              <div class="body">
+                <h3>Benefits of AI</h3>
+                <p>Where AI helps: writing, research, problem solving.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">4 lessons</span><span class="state">Locked</span></div>
+            </article>
+
+            <article class="unit t-bronze">
+              <div class="unit-top"><span class="mono">Unit 01.5</span><span class="mono">6 min</span></div>
+              <div class="body">
+                <h3>AI Accuracy</h3>
+                <p>Hallucinations, and how to catch one.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">2 lessons</span><span class="state">Locked</span></div>
+            </article>
+
+            <article class="unit t-rose">
+              <div class="unit-top"><span class="mono">Unit 02</span><span class="mono">10 min</span></div>
+              <div class="body">
+                <h3>AI Tools &amp; Techniques</h3>
+                <p>Files, images, and what is safe to upload.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">3 lessons</span><span class="state">Locked</span></div>
+            </article>
+
+            <article class="unit t-rose">
+              <div class="unit-top"><span class="mono">Unit 03</span><span class="mono">14 min</span></div>
+              <div class="body">
+                <h3>AI Ethics</h3>
+                <p>Cheating, bias and safety, decided by scenario.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">3 lessons</span><span class="state">Locked</span></div>
+            </article>
+
+            <article class="unit t-gold">
+              <div class="unit-top"><span class="mono">Unit 04</span><span class="mono">18 min</span></div>
+              <div class="body">
+                <h3>Building LLMs &amp; Neural Nets</h3>
+                <p>Tokens, attention and training, as puzzles.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">3 lessons</span><span class="state">Locked</span></div>
+            </article>
+
+            <article class="unit t-gold capstone">
+              <div class="unit-top"><span class="mono">Unit 05</span><span class="mono">Open-ended</span></div>
+              <div class="body">
+                <h3>Capstone</h3>
+                <p>Write an AI policy for your own schoolwork.</p>
+              </div>
+              <div class="unit-foot"><span class="mono">1 lesson</span><button type="button" data-start>Open ↗</button></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="progress">
+        <div class="wrap">
+          <p class="eyebrow">How progress works</p>
+          <div class="prog-grid">
+            <div class="prog">
+              <div class="kicker"><span>01</span><span>Earn</span></div>
+              <h3>Earn XP and RAM</h3>
+            </div>
+            <div class="prog">
+              <div class="kicker"><span>02</span><span>Spend</span></div>
+              <h3>Spend it on Hard Drives</h3>
+              <div class="bars">
+                <i style="background:linear-gradient(90deg,#cd7f32,#7a4a1c)"></i>
+                <i style="background:linear-gradient(90deg,#b76e79,#6f3a43)"></i>
+                <i style="background:linear-gradient(90deg,#ffd700,#9a7b00)"></i>
+                <i style="background:linear-gradient(90deg,#87ceeb,#eaf1f8)"></i>
+              </div>
+            </div>
+            <div class="prog">
+              <div class="kicker"><span>03</span><span>Rank</span></div>
+              <h3>Compete in weekly leagues</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap foot">
+          <div class="mark"><i></i><span>Synapse</span></div>
+          <span class="meta">Grades 9–12</span>
+        </div>
+      </footer>
+    </main>
+
+    <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-body">
+      <div class="scrim" data-close></div>
+      <div class="panel">
+        <div class="panel-top">
+          <p class="eyebrow">Session</p>
+          <button class="x" type="button" data-close aria-label="Close">×</button>
+        </div>
+        <h2 id="gate-title">Save your progress</h2>
+        <p id="gate-body">Guest saves XP and RAM on this computer only.</p>
+        <div class="actions">
+          <button class="primary" type="button" data-account data-autofocus>Create an account</button>
+          <button class="secondary" type="button" data-account>Log in</button>
+          <button class="ghost" type="button" data-guest>Continue as guest</button>
+        </div>
+        <p class="notice" aria-live="polite" data-notice></p>
+      </div>
+    </div>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+    <script>
+      (function () {
+        var guestKey = "synapse.guest";
+        var isGuest = function () {
+          try { return localStorage.getItem(guestKey) === "1"; } catch (e) { return false; }
+        };
+
+        /* nav stays flat until you scroll */
+        var nav = document.getElementById("nav");
+        var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 8); };
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+
+        var menu = document.getElementById("menu");
+        var sheet = document.getElementById("sheet");
+        menu.addEventListener("click", function () {
+          var open = sheet.classList.toggle("open");
+          menu.setAttribute("aria-expanded", String(open));
+          menu.textContent = open ? "✕" : "☰";
+        });
+
+        /* toast for screens that are not built yet */
+        var toast = document.querySelector("[data-toast]");
+        var toastTimer = 0;
+        var soon = function () {
+          toast.textContent = "Coming soon.";
+          toast.classList.add("on");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function () { toast.classList.remove("on"); }, 2400);
+        };
+        Array.prototype.forEach.call(document.querySelectorAll("[data-soon]"), function (el) {
+          el.addEventListener("click", function () { sheet.classList.remove("open"); soon(); });
+        });
+
+        /* account gate */
+        var gate = document.getElementById("gate");
+        var notice = document.querySelector("[data-notice]");
+        var stat = document.querySelector("[data-stat]");
+        var pendingScroll = false;
+
+        var paintSession = function () {
+          if (isGuest()) {
+            stat.innerHTML = '<span class="guest">Guest</span>';
+          }
+        };
+        paintSession();
+
+        var openGate = function (scrollAfter) {
+          pendingScroll = !!scrollAfter;
+          notice.textContent = "";
+          gate.classList.add("open");
+          document.body.style.overflow = "hidden";
+          gate.querySelector("[data-autofocus]").focus();
+        };
+        var closeGate = function () {
+          gate.classList.remove("open");
+          document.body.style.overflow = "";
+        };
+
+        Array.prototype.forEach.call(document.querySelectorAll("[data-start]"), function (el) {
+          el.addEventListener("click", function (event) {
+            if (isGuest()) return;
+            event.preventDefault();
+            openGate(el.getAttribute("href") === "#units");
+          });
+        });
+
+        Array.prototype.forEach.call(gate.querySelectorAll("[data-close]"), function (el) {
+          el.addEventListener("click", closeGate);
+        });
+        Array.prototype.forEach.call(gate.querySelectorAll("[data-account]"), function (el) {
+          el.addEventListener("click", function () {
+            notice.textContent = "Accounts aren't open yet.";
+          });
+        });
+        gate.querySelector("[data-guest]").addEventListener("click", function () {
+          try { localStorage.setItem(guestKey, "1"); } catch (e) {}
+          paintSession();
+          closeGate();
+          if (pendingScroll) {
+            document.getElementById("units").scrollIntoView({ behavior: "smooth" });
+            pendingScroll = false;
+          } else {
+            soon();
+          }
+        });
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && gate.classList.contains("open")) {
+            closeGate();
+            return;
+          }
+          if (event.key !== "Tab" || !gate.classList.contains("open")) return;
+          var buttons = gate.querySelectorAll("button");
+          var first = buttons[0];
+          var last = buttons[buttons.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        });
+
+        /* lesson: directional selection frame + answer states */
+        var choices = document.querySelector("[data-choices]");
+        var frame = choices.querySelector(".sel-frame");
+        var size = choices.querySelector("[data-size]");
+        var rows = choices.querySelectorAll(".choice");
+        var feedback = document.querySelector("[data-feedback]");
+        var go = document.querySelector("[data-continue]");
+        var answered = false;
+
+        var notes = {
+          a: { correct: false, text: "Models only search when a tool is attached." },
+          b: { correct: true, text: "It predicts one word at a time, with no lookup and no reasoning." },
+          c: { correct: false, text: "No database, just patterns, so details drift." }
+        };
+
+        var measure = function (row) {
+          var box = choices.getBoundingClientRect();
+          var rect = row.getBoundingClientRect();
+          frame.style.top = rect.top - box.top + "px";
+          frame.style.left = rect.left - box.left + "px";
+          frame.style.width = rect.width + "px";
+          frame.style.height = rect.height + "px";
+          size.textContent = Math.round(rect.width) + " × " + Math.round(rect.height);
+          frame.classList.add("on");
+        };
+
+        Array.prototype.forEach.call(rows, function (row) {
+          var fill = row.querySelector(".fill");
+
+          row.addEventListener("pointerenter", function (event) {
+            if (answered) return;
+            var rect = row.getBoundingClientRect();
+            var x = (event.clientX - rect.left) / rect.width - 0.5;
+            var y = (event.clientY - rect.top) / rect.height - 0.5;
+            var dir = Math.abs(x) > Math.abs(y) ? (x > 0 ? "right" : "left") : y > 0 ? "bottom" : "top";
+            fill.style.animation = "none";
+            void fill.offsetWidth;
+            fill.style.animation = "fill-" + dir + " 300ms cubic-bezier(.22,1,.36,1) both";
+            fill.style.opacity = "1";
+            measure(row);
+          });
+
+          row.addEventListener("pointerleave", function () {
+            if (answered) return;
+            fill.style.opacity = "0";
+            frame.classList.remove("on");
+          });
+
+          row.addEventListener("focus", function () {
+            if (!answered) measure(row);
+          });
+
+          row.addEventListener("click", function () {
+            if (answered) return;
+            answered = true;
+            var picked = row.getAttribute("data-id");
+            var right = notes[picked].correct;
+
+            Array.prototype.forEach.call(rows, function (other) {
+              var id = other.getAttribute("data-id");
+              other.disabled = true;
+              other.classList.remove("muted");
+              if (notes[id].correct) other.classList.add("correct");
+              else if (id === picked) other.classList.add("wrong");
+              else other.classList.add("muted");
+            });
+
+            frame.classList.toggle("wrong", !right);
+            measure(row);
+
+            feedback.className = "feedback on" + (right ? "" : " wrong");
+            feedback.innerHTML = "<b>" + (right ? "Correct." : "Not quite.") + "</b> " + notes[picked].text;
+
+            go.disabled = false;
+            go.classList.add("ready");
+            go.textContent = "Continue →";
+          });
+        });
+
+        go.addEventListener("click", function () {
+          if (isGuest()) soon();
+          else openGate(false);
+        });
+      })();
+    </script>
+  </body>
+</html>
