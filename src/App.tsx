@@ -65,7 +65,7 @@ export default function App() {
 
       <div
         aria-hidden="true"
-        className="grain pointer-events-none fixed inset-0 z-[2] opacity-[0.03] mix-blend-overlay"
+        className="grain pointer-events-none fixed inset-0 z-[2] opacity-[0.04]"
       />
 
       <CosmeticsLayer />

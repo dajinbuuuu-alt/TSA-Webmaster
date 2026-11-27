@@ -9,18 +9,22 @@ type UnitCardProps = {
   onStart?: () => void;
 };
 
+// Built once: pointermove fires constantly and each matchMedia() call allocates.
+const COARSE_POINTER = window.matchMedia("(pointer: coarse)");
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+
 export function UnitCard({ unit, wide = false, onStart }: UnitCardProps) {
   const [tilt, setTilt] = useState<string>("");
 
   const onPointerMove = (event: PointerEvent<HTMLElement>) => {
-    if (wide) return;
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (wide || COARSE_POINTER.matches || REDUCED_MOTION.matches) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt(`perspective(900px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg)`);
+    const next = `perspective(900px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg)`;
+    // Same string means the same pixels: skip the re-render.
+    setTilt((previous) => (previous === next ? previous : next));
   };
 
   const isOpen = unit.state !== "locked";

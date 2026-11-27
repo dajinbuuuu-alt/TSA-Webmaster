@@ -211,7 +211,10 @@ export function Pet({ petId }: { petId: string }) {
         const cx = box.left + box.width / 2;
         const cy = box.top + box.height * 0.55;
         const clamp = (value: number) => Math.max(-1, Math.min(1, Math.round(value * 10) / 10));
-        setLook({ x: clamp((event.clientX - cx) / 340), y: clamp((event.clientY - cy) / 340) });
+        const x = clamp((event.clientX - cx) / 340);
+        const y = clamp((event.clientY - cy) / 340);
+        // Re-rendering the whole SVG for an unchanged look is pure waste.
+        setLook((previous) => (previous.x === x && previous.y === y ? previous : { x, y }));
       });
     };
     window.addEventListener("pointermove", onMove, { passive: true });

@@ -50,8 +50,9 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    // A trail is decoration on top of decoration: skip phones and reduced motion.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
 
     type Particle = {
       x: number;
@@ -68,11 +69,14 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
 
     let particles: Particle[] = [];
     let frame = 0;
+    let lastSpawn = 0;
+    const MAX_PARTICLES = 200;
     const glow = glowSprite(config.color);
     let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // A glowing dot gains nothing from a 2x buffer; 1.5x halves the fill cost.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.floor(window.innerWidth * dpr);
       canvas.height = Math.floor(window.innerHeight * dpr);
       canvas.style.width = `${window.innerWidth}px`;
@@ -101,21 +105,35 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
         });
       }
       // Hard ceiling so a fast mouse can't grow the list without bound.
-      if (particles.length > 320) particles = particles.slice(particles.length - 320);
+      if (particles.length > MAX_PARTICLES) {
+        particles.splice(0, particles.length - MAX_PARTICLES);
+      }
+    };
+
+    const start = () => {
+      if (!frame) frame = window.requestAnimationFrame(tick);
     };
 
     const onMove = (event: PointerEvent) => {
       pointer = { x: event.clientX, y: event.clientY };
+      // High-polling mice fire several events per frame; one burst is enough.
+      if (event.timeStamp - lastSpawn < 14) return;
+      lastSpawn = event.timeStamp;
       spawn(config.mode === "glyphs" ? 1 : 2);
+      start();
     };
 
     const tick = () => {
+      frame = 0;
       context.clearRect(0, 0, window.innerWidth, window.innerHeight);
       context.textAlign = "center";
 
-      particles = particles.filter((particle) => particle.life > 0);
-      particles.forEach((particle) => {
+      // Compact in place: filtering allocated a new array on every frame.
+      let alive = 0;
+      for (let index = 0; index < particles.length; index += 1) {
+        const particle = particles[index];
         particle.life -= 1;
+        if (particle.life <= 0) continue;
         particle.x += particle.vx;
         particle.y += particle.vy;
         particle.vy += config.gravity;
@@ -206,14 +224,18 @@ function TrailCanvas({ config }: { config: TrailConfig }) {
           context.arc(particle.x, particle.y, Math.max(0.6, particle.size * alpha), 0, Math.PI * 2);
           context.fill();
         }
-      });
+
+        particles[alive] = particle;
+        alive += 1;
+      }
+      particles.length = alive;
 
       context.globalAlpha = 1;
-      frame = window.requestAnimationFrame(tick);
+      // Idle: stop the loop instead of clearing a full-viewport canvas forever.
+      if (alive > 0) frame = window.requestAnimationFrame(tick);
     };
 
     resize();
-    tick();
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", onMove, { passive: true });
 

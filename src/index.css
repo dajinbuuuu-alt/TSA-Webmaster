@@ -355,7 +355,7 @@
   width: 112px;
   height: 108px;
   pointer-events: none;
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.5));
+  /* No drop-shadow filter: it re-rastered the whole pet on every animation frame. */
 }
 
 @media (max-width: 640px) {
@@ -542,8 +542,11 @@
 }
 
 .cosmic-horizon {
-  background-color: #000;
+  /* The theme tint blends into the photo at paint time instead of living in an
+     overlay above it, so the moving backdrop is just a transformed layer. */
+  background-color: color-mix(in srgb, var(--bg-color, #ff8a3d) 50%, transparent);
   background-image: url("./assets/event-horizon.jpg");
+  background-blend-mode: color;
   transform-origin: 66% 22%;
   animation: horizon-breathe 18s ease-in-out infinite;
   will-change: transform;
@@ -569,44 +572,24 @@
   );
 }
 
-.cosmic-horizon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--bg-color, #ff8a3d);
-  mix-blend-mode: color;
-  opacity: 0.5;
-  animation: horizon-glow 9s ease-in-out infinite;
-}
-
-/* The photo can't physically swirl, so it breathes and brightens instead: slow
-   enough to feel like the disk is turning, small enough to stay sharp. */
+/* The photo can't physically swirl, so it breathes instead: slow enough to feel
+   like the disk is turning, small enough to stay sharp. Transform only, so the
+   layer is moved on the compositor and never re-filtered or re-blended. */
 @keyframes horizon-breathe {
   0%,
   100% {
     transform: scale(1) rotate(0deg);
-    filter: brightness(1);
   }
   50% {
     transform: scale(1.06) rotate(0.8deg);
-    filter: brightness(1.12);
-  }
-}
-
-@keyframes horizon-glow {
-  0%,
-  100% {
-    opacity: 0.44;
-  }
-  50% {
-    opacity: 0.6;
   }
 }
 
 /* Prism's 5-star backdrop: a quasar photo, tinted at runtime. */
 .cosmic-quasar {
-  background-color: #000;
+  background-color: color-mix(in srgb, var(--bg-color, #ffb066) 32%, transparent);
   background-image: url("./assets/quasar.jpg");
+  background-blend-mode: color;
   transform-origin: 52% 46%;
   animation: quasar-breathe 15s ease-in-out infinite;
   will-change: transform;
@@ -657,35 +640,13 @@
   }
 }
 
-.cosmic-quasar::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--bg-color, #ffb066);
-  mix-blend-mode: color;
-  opacity: 0.3;
-  animation: quasar-pulse 10s ease-in-out infinite;
-}
-
 @keyframes quasar-breathe {
   0%,
   100% {
     transform: scale(1) translate3d(0, 0, 0) rotate(0deg);
-    filter: brightness(1) saturate(1);
   }
   50% {
     transform: scale(1.05) translate3d(1.4%, -1%, 0) rotate(-0.6deg);
-    filter: brightness(1.1) saturate(1.1);
-  }
-}
-
-@keyframes quasar-pulse {
-  0%,
-  100% {
-    opacity: 0.26;
-  }
-  50% {
-    opacity: 0.38;
   }
 }
 
@@ -916,6 +877,7 @@
   }
 
   .cosmic-quasar {
+    background-color: color-mix(in srgb, var(--bg-color, #ffb066) 20%, transparent);
     background-position: 56% 38%;
     opacity: 0.84;
   }
@@ -930,10 +892,6 @@
         rgba(0, 0, 0, 0.34) 68%,
         #000 96%
       );
-  }
-
-  .cosmic-quasar::after {
-    opacity: 0.22;
   }
 
   .cosmic-horizon::before {

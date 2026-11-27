@@ -50,7 +50,7 @@ export function MorphNavbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-colors duration-300",
         scrolled
-          ? "border-b border-white/[0.08] bg-black/85 backdrop-blur-md"
+          ? "border-b border-white/[0.08] bg-black/92"
           : "border-b border-transparent bg-transparent",
       )}
     >
