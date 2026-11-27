@@ -3,11 +3,11 @@ import { ArrowRight, Gift } from "lucide-react";
 import { AuthGate } from "./components/AuthGate";
 import { CosmeticsLayer } from "./components/CosmeticsLayer";
 import { DecryptText } from "./components/DecryptText";
-import { DottedGlow } from "./components/DottedGlow";
 import { LessonPreview } from "./components/LessonPreview";
 import { MorphNavbar } from "./components/MorphNavbar";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { RewardToast } from "./components/RewardToast";
+import { OrbitRings } from "./components/Sky";
 import { SoonToast } from "./components/SoonToast";
 import { StubBar } from "./components/StubBar";
 import { UnitCard } from "./components/UnitCard";
@@ -72,46 +72,50 @@ export default function App() {
       <MorphNavbar />
 
       <main id="main" className="relative z-10">
-        <section className="relative overflow-hidden border-b border-white/[0.06] pt-28 pb-14 lg:pt-36 lg:pb-20">
-          <DottedGlow />
-          <div className="relative mx-auto grid w-full max-w-[1180px] gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-16">
+        <section className="relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24">
+          <div aria-hidden="true" className="hero-scrim" />
+          <span aria-hidden="true" className="hero-rule" />
+          <div aria-hidden="true" className="hero-glow" />
+          <OrbitRings />
+          <div className="relative z-10 mx-auto grid w-full max-w-[1180px] gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-16">
             <div>
-              <p className="eyebrow hero-shadow flex items-center gap-2.5">
+              <span aria-hidden="true" className="mb-7 block h-px w-14 bg-gradient-to-r from-signal via-signal/40 to-transparent" />
+
+              <p className="eyebrow flex items-center gap-2.5">
                 <span className="inline-block h-[6px] w-[6px] bg-signal" />
                 TSA Webmaster · AI literacy portal
               </p>
 
-              <h1 className="hero-shadow mt-6 font-display text-[clamp(2.4rem,5.1vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-ink">
-                Learn how AI{" "}
-                <span className="underline decoration-signal/50 decoration-[2px] underline-offset-[10px]">
-                  actually
-                </span>{" "}
-                works.
+              <h1 className="mt-6 font-display text-[clamp(2.4rem,5.1vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.035em] text-ink">
+                Learn how AI actually works.
               </h1>
 
-              <p className="hero-shadow mt-6 max-w-[46ch] text-[15px] leading-7 text-dim">
+              <p className="mt-6 max-w-[46ch] text-[15.5px] leading-7 text-dim">
                 Six units on how AI works and where it fails, for grades 9–12.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <div className="mt-9 flex flex-wrap items-center gap-3">
                 <a
                   href="#units"
                   onClick={startCourse}
-                  className="group inline-flex h-11 items-center gap-2.5 rounded-[3px] bg-brand px-5 text-[13.5px] font-medium text-white transition-colors hover:bg-[#7b00de]"
+                  className="group inline-flex h-11 items-center gap-2.5 rounded-[3px] bg-ink px-5 text-[13.5px] font-semibold text-[#05070b] transition-colors hover:bg-white max-sm:w-full"
                 >
                   Start Unit 0
-                  <span className="font-mono text-[10px] tracking-[0.14em] text-white/65">2 MIN</span>
+                  <span className="font-mono text-[10px] font-medium tracking-[0.14em] text-[#05070b]/55">
+                    2 MIN
+                  </span>
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </a>
                 <a
                   href="#units"
-                  className="text-[13.5px] text-ink/80 underline decoration-white/20 underline-offset-4 transition-colors hover:text-ink hover:decoration-white/60"
+                  className="group inline-flex h-11 items-center gap-2 rounded-[3px] border border-white/15 px-4 text-[13.5px] text-ink/85 transition-colors hover:border-white/35 hover:bg-white/[0.05] hover:text-ink max-sm:w-full max-sm:justify-between"
                 >
                   See the full curriculum
+                  <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </a>
               </div>
 
-              <div className="hero-shadow mt-10 flex flex-wrap items-center gap-3 font-mono text-[10px] tracking-[0.14em] text-ink/70 uppercase max-sm:-mx-2 max-sm:rounded-[2px] max-sm:bg-black/45 max-sm:px-2 max-sm:py-2">
+              <div className="mt-12 flex flex-wrap items-center gap-3 font-mono text-[10px] tracking-[0.14em] text-ink/60 uppercase">
                 {FACT_ROW.map((fact, index) => (
                   <span key={fact} className="flex items-center gap-3">
                     {index > 0 && (
