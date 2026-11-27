@@ -198,6 +198,28 @@ export function Pet({ petId }: { petId: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [look, setLook] = useState<Look>({ x: 0, y: 0 });
   const [blink, setBlink] = useState(false);
+  const [onScreen, setOnScreen] = useState(true);
+  const [tabHidden, setTabHidden] = useState(false);
+
+  // A pet nobody can see should not keep the compositor awake.
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      setOnScreen(entries[0]?.isIntersecting ?? true);
+    });
+    observer.observe(node);
+
+    const onVisibility = () => setTabHidden(document.hidden);
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
 
   // Eyes follow the pointer, capped so they never spin all the way round.
   useEffect(() => {
@@ -250,7 +272,7 @@ export function Pet({ petId }: { petId: string }) {
   return (
     <div
       ref={ref}
-      className="pet"
+      className={onScreen && !tabHidden ? "pet" : "pet pet-parked"}
       aria-hidden="true"
       style={{ color: PET_COLOR[variant] }}
     >

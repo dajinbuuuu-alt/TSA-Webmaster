@@ -123,6 +123,9 @@ export function MorphNavbar() {
                 flair === "halo" && "flair-halo",
               )}
             >
+              {(flair === "ring" || flair === "halo") && (
+                <span className="flair-sheen" aria-hidden="true" />
+              )}
               <span
                 className={cn(
                   accentOn ? "accent-text" : handle ? "text-ink" : "text-signal/90",
@@ -184,6 +187,9 @@ export function MorphNavbar() {
               flair === "halo" && "flair-halo",
             )}
           >
+            {(flair === "ring" || flair === "halo") && (
+              <span className="flair-sheen" aria-hidden="true" />
+            )}
             <span className="font-mono text-[10px] tracking-[0.14em] text-dim uppercase">
               {session ? (
                 <>

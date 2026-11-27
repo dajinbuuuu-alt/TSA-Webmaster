@@ -147,6 +147,9 @@ export function ProfilePanel() {
                 flair === "halo" && "flair-halo",
               )}
             >
+              {(flair === "ring" || flair === "halo") && (
+                <span className="flair-sheen" aria-hidden="true" />
+              )}
               <span className="profile-avatar-inner grid h-full w-full place-items-center">{initial}</span>
             </div>
 
