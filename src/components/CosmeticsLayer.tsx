@@ -511,6 +511,84 @@ function SignalArt({ color }: { color: string }) {
   );
 }
 
+/*
+ * Event Horizon and Quasar are painted in CSS: cones of gas on a plane that is
+ * squashed into the tilt of the disk and spun, so the disk shears the way a real
+ * accretion disk does. Nothing is a bitmap, so it stays sharp at any size.
+ */
+const ART_W = 1392;
+const ART_H = 752;
+
+function randomFrom(seed: number) {
+  let state = seed;
+  return () => (state = (state * 1103515245 + 12345) % 2147483648) / 2147483648;
+}
+
+function starField(seed: number, count: number, fill: string) {
+  const random = randomFrom(seed);
+  return Array.from({ length: count }, () => ({
+    cx: (random() * ART_W).toFixed(1),
+    cy: (random() * ART_H).toFixed(1),
+    r: (0.45 + random() * random() * 2.1).toFixed(2),
+    opacity: (0.12 + random() * 0.58).toFixed(2),
+    fill,
+  }));
+}
+
+const HORIZON_STARS = starField(11, 120, "#ffe2c2");
+const QUASAR_STARS = starField(29, 96, "#ffdcc0");
+
+function StarField({ stars }: { stars: ReturnType<typeof starField> }) {
+  return (
+    <svg
+      className="art-stars"
+      viewBox={`0 0 ${ART_W} ${ART_H}`}
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {stars.map((star, index) => (
+        <circle key={index} {...star} />
+      ))}
+    </svg>
+  );
+}
+
+function HorizonArt() {
+  return (
+    <div className="art art-horizon">
+      <StarField stars={HORIZON_STARS} />
+      <div className="art-plane">
+        <span className="art-gas" />
+        <span className="art-gas art-gas-b" />
+        <span className="art-gas art-gas-c" />
+      </div>
+      <div className="art-core">
+        <span className="art-lens" />
+        <span className="art-disc" />
+      </div>
+    </div>
+  );
+}
+
+function QuasarArt() {
+  return (
+    <div className="art art-quasar">
+      <StarField stars={QUASAR_STARS} />
+      <span className="art-jet art-jet-up" />
+      <span className="art-jet art-jet-down" />
+      <div className="art-plane">
+        <span className="art-gas" />
+        <span className="art-gas art-gas-b" />
+      </div>
+      <div className="art-core art-core-bright">
+        <span className="art-disc" />
+        <span className="art-lens art-lens-thin" />
+      </div>
+    </div>
+  );
+}
+
 function Backdrop({ variant, color }: { variant: string; color: string }) {
   if (variant === "horizon") {
     return (
@@ -518,7 +596,9 @@ function Backdrop({ variant, color }: { variant: string; color: string }) {
         aria-hidden="true"
         className="cosmic-layer cosmic-horizon"
         style={{ "--bg-color": color } as CSSProperties}
-      />
+      >
+        <HorizonArt />
+      </div>
     );
   }
   if (variant === "orbit") return <OrbitArt color={color} />;
@@ -529,7 +609,9 @@ function Backdrop({ variant, color }: { variant: string; color: string }) {
         aria-hidden="true"
         className="cosmic-layer cosmic-quasar"
         style={{ "--bg-color": color } as CSSProperties}
-      />
+      >
+        <QuasarArt />
+      </div>
     );
   }
   return <CircuitArt color={color} />;

@@ -541,14 +541,180 @@
   }
 }
 
+/* The two cosmic backdrops are vectors: every ring of gas turns at its own
+   speed, so the disk shears and nothing goes soft when the window grows. */
+.art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.art-stars {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+}
+
+/* One square of gas, squashed into the tilt of the disk and spun. */
+.art-plane {
+  position: absolute;
+  top: 45%;
+  left: 57%;
+  width: min(1300px, 138vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scaleY(0.3);
+  filter: blur(22px) saturate(1.15);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+}
+
+.art-gas {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 12deg,
+    rgba(255, 214, 170, 0) 0deg,
+    rgba(255, 158, 82, 0.72) 22deg,
+    rgba(255, 246, 226, 0.95) 58deg,
+    rgba(255, 116, 44, 0.5) 92deg,
+    rgba(110, 28, 6, 0) 138deg,
+    rgba(255, 176, 116, 0.6) 186deg,
+    rgba(255, 248, 236, 0.88) 224deg,
+    rgba(255, 122, 52, 0.44) 262deg,
+    rgba(90, 22, 6, 0) 306deg,
+    rgba(255, 214, 170, 0) 360deg
+  );
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0 15%, #000 34% 66%, transparent 92%);
+  animation: art-spin 34s linear infinite;
+}
+
+.art-gas-b {
+  inset: 9%;
+  background: conic-gradient(
+    from 150deg,
+    rgba(255, 240, 214, 0.7) 0deg,
+    rgba(255, 128, 54, 0.3) 46deg,
+    rgba(120, 30, 8, 0) 96deg,
+    rgba(255, 206, 158, 0.55) 150deg,
+    rgba(255, 120, 48, 0.34) 210deg,
+    rgba(110, 26, 6, 0) 268deg,
+    rgba(255, 240, 214, 0.7) 360deg
+  );
+  animation-duration: 21s;
+  animation-direction: reverse;
+  opacity: 0.85;
+}
+
+.art-gas-c {
+  inset: 19%;
+  background: conic-gradient(
+    from 300deg,
+    rgba(255, 250, 240, 0.85) 0deg,
+    rgba(255, 150, 74, 0.4) 70deg,
+    rgba(255, 90, 30, 0) 130deg,
+    rgba(255, 236, 206, 0.6) 200deg,
+    rgba(255, 140, 62, 0.34) 268deg,
+    rgba(255, 90, 30, 0) 330deg,
+    rgba(255, 250, 240, 0.85) 360deg
+  );
+  animation-duration: 13s;
+}
+
+@keyframes art-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The shadow, its rim of light, and the disk lensed over the top. */
+.art-core {
+  position: absolute;
+  top: 45%;
+  left: 57%;
+  width: min(174px, 15vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+}
+
+.art-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #010206 58%, #0a0508 100%);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 238, 212, 0.9),
+    0 0 18px 4px rgba(255, 176, 102, 0.75),
+    0 0 90px 26px rgba(255, 120, 44, 0.4);
+}
+
+.art-lens {
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 238, 210, 0.5);
+  border-bottom-color: transparent;
+  box-shadow: 0 0 22px rgba(255, 190, 130, 0.45);
+  filter: blur(2px);
+  mask-image: linear-gradient(to bottom, #000 0 44%, rgba(0, 0, 0, 0.4) 58%, transparent 72%);
+  transform: scaleY(0.94);
+}
+
+.art-lens-thin {
+  border-width: 1.5px;
+  opacity: 0.7;
+}
+
+.art-quasar .art-plane {
+  top: 46%;
+  width: min(1150px, 122vw);
+  transform: translate(-50%, -50%) scaleY(0.32);
+}
+
+.art-quasar .art-core {
+  top: 46%;
+  width: min(132px, 12vw);
+}
+
+.art-core-bright .art-disc {
+  background: radial-gradient(circle at 50% 46%, #fffdf7 0 26%, #ffd9a2 48%, #ff8b3f 70%, #7a2408 100%);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 250, 236, 0.95),
+    0 0 26px 8px rgba(255, 206, 150, 0.85),
+    0 0 140px 60px rgba(255, 128, 48, 0.45);
+}
+
+.art-jet {
+  position: absolute;
+  left: 57%;
+  width: min(54px, 5vw);
+  height: 20vh;
+  background: linear-gradient(to top, rgba(255, 240, 214, 0.5), rgba(255, 170, 96, 0.14) 45%, transparent 90%);
+  clip-path: polygon(44% 100%, 56% 100%, 100% 0, 0 0);
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  opacity: 0.34;
+}
+
+.art-jet-up {
+  top: calc(46% - 20vh);
+  transform: translateX(-50%) rotate(-8deg);
+  transform-origin: 50% 100%;
+}
+
+.art-jet-down {
+  top: 46%;
+  background: linear-gradient(to bottom, rgba(255, 240, 214, 0.5), rgba(255, 170, 96, 0.14) 45%, transparent 90%);
+  transform: translateX(-50%) rotate(8deg);
+  transform-origin: 50% 0;
+}
+
 .cosmic-horizon {
-  background-color: #000;
-  /* Real motion: the disk is remapped frame by frame into a looping GIF, so the
-     gas orbits instead of the whole photo just swelling. */
-  background-image: url("./assets/event-horizon-spin.gif");
-  background-position: 66% 16%;
-  background-size: cover;
-  opacity: 0.92;
+  background: radial-gradient(120% 96% at 60% 44%, #150a05 0%, #07080c 52%, #040509 100%);
+  opacity: 0.88;
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 46%, transparent 86%);
   mask-image: linear-gradient(to bottom, black 0%, black 46%, transparent 86%);
 }
@@ -558,13 +724,15 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: block;
   background: linear-gradient(
     90deg,
     #000 0%,
-    rgba(0, 0, 0, 0.82) 24%,
-    rgba(0, 0, 0, 0.38) 46%,
-    transparent 64%
+    rgba(0, 0, 0, 0.92) 22%,
+    rgba(0, 0, 0, 0.62) 44%,
+    rgba(0, 0, 0, 0.18) 58%,
+    transparent 70%
   );
 }
 
@@ -572,6 +740,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: var(--bg-color, #ff8a3d);
   mix-blend-mode: color;
   opacity: 0.5;
@@ -579,11 +748,8 @@
 
 /* Prism's 5-star backdrop: a quasar photo, tinted at runtime. */
 .cosmic-quasar {
-  background-color: #000;
-  background-image: url("./assets/quasar-spin.gif");
-  background-position: 64% 50%;
-  background-size: cover;
-  opacity: 0.94;
+  background: radial-gradient(120% 90% at 68% 46%, #1c0d05 0%, #09080d 56%, #040509 100%);
+  opacity: 0.95;
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
 }
@@ -592,6 +758,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(
     90deg,
     rgba(0, 0, 0, 0.95) 0%,
@@ -611,10 +778,6 @@
 /* At tablet-landscape widths the card and copy share the row, so pull the core
    behind the card instead of behind the headline. */
 @media (min-width: 1024px) and (max-width: 1279px) {
-  .cosmic-quasar {
-    background-position: 26% 50%;
-  }
-
   /* The copy takes a bigger share of the row here, so hold it darker longer. */
   .cosmic-quasar::before {
     background: linear-gradient(
@@ -632,22 +795,10 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: var(--bg-color, #ffb066);
   mix-blend-mode: color;
   opacity: 0.3;
-}
-
-/* A CSS animation can be stopped; a GIF cannot, so serve the still photographs
-   to anyone who asked for less motion. This has to come after the backdrops
-   above, or the shortcut rules lose the cascade. */
-@media (prefers-reduced-motion: reduce) {
-  .cosmic-horizon {
-    background-image: url("./assets/event-horizon.jpg");
-  }
-
-  .cosmic-quasar {
-    background-image: url("./assets/quasar.jpg");
-  }
 }
 
 /* ---------- Opening a drive ---------- */
@@ -871,14 +1022,17 @@
 
 /* On a phone the horizon fills the hero, so darken it top-to-bottom instead. */
 @media (max-width: 640px) {
+  /* The hero is too tight to fit the shadow between the copy and the card. */
+  .art-core {
+    display: none;
+  }
+
   .cosmic-horizon {
-    background-position: 58% 8%;
-    opacity: 0.8;
+    opacity: 0.85;
   }
 
   .cosmic-quasar {
-    background-position: 56% 38%;
-    opacity: 0.84;
+    opacity: 0.86;
   }
 
   .cosmic-quasar::before {
