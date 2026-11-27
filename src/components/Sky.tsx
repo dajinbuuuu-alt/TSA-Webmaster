@@ -57,32 +57,32 @@ export function OrbitRings() {
   return (
     <div className="hero-rings" aria-hidden="true">
       <svg viewBox="0 0 900 900" fill="none" focusable="false">
-        <circle cx="450" cy="450" r="420" stroke="rgba(0, 255, 255, 0.11)" />
-        <circle cx="450" cy="450" r="318" stroke="rgba(0, 255, 255, 0.16)" />
-        <circle cx="450" cy="450" r="214" stroke="rgba(143, 0, 255, 0.18)" />
+        <circle className="ring-line ring-a" cx="450" cy="450" r="420" />
+        <circle className="ring-line ring-b" cx="450" cy="450" r="318" />
+        <circle className="ring-line ring-c" cx="450" cy="450" r="214" />
         <g className="hero-arc">
           <circle
             cx="450"
             cy="450"
             r="420"
-            stroke="rgba(0, 255, 255, 0.55)"
+            className="ring-arc-line"
             strokeWidth="1.2"
             strokeDasharray="150 2490"
             strokeLinecap="round"
           />
-          <circle cx="450" cy="30" r="2.6" fill="#00ffff" fillOpacity="0.75" />
+          <circle className="ring-node" cx="450" cy="30" r="2.6" />
         </g>
         <g className="hero-arc hero-arc-slow">
           <circle
             cx="450"
             cy="450"
             r="318"
-            stroke="rgba(143, 0, 255, 0.5)"
+            className="ring-arc-line ring-arc-line-soft"
             strokeWidth="1.2"
             strokeDasharray="70 1930"
             strokeLinecap="round"
           />
-          <circle cx="450" cy="132" r="2" fill="#c9a4ff" fillOpacity="0.7" />
+          <circle className="ring-node ring-node-soft" cx="450" cy="132" r="2" />
         </g>
       </svg>
     </div>

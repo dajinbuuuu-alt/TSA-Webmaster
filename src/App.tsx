@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import { ArrowRight, Gift } from "lucide-react";
 import { AuthGate } from "./components/AuthGate";
 import { CosmeticsLayer } from "./components/CosmeticsLayer";
@@ -7,13 +7,14 @@ import { LessonPreview } from "./components/LessonPreview";
 import { MorphNavbar } from "./components/MorphNavbar";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { RewardToast } from "./components/RewardToast";
-import { OrbitRings } from "./components/Sky";
+import { OrbitRings, tintChannels } from "./components/Sky";
 import { SoonToast } from "./components/SoonToast";
 import { StubBar } from "./components/StubBar";
 import { UnitCard } from "./components/UnitCard";
 import { VaultPanel } from "./components/VaultPanel";
 import { TIER_GRADIENT, TIER_LABEL, UNITS } from "./data/units";
 import { getSession, requestAuth } from "./lib/auth";
+import { defaultColor } from "./lib/cosmetics";
 import { COSMETICS } from "./lib/economy";
 import { useProgress } from "./lib/progress";
 import { announceSoon } from "./lib/soon";
@@ -36,7 +37,12 @@ const PROGRESSION = [
 export default function App() {
   const lessonUnits = UNITS.slice(0, 6);
   const capstone = UNITS[6];
-  const { ownedCount } = useProgress();
+  const { ownedCount, loadout, tints } = useProgress();
+  // The hero's light source follows the equipped theme; without one it stays
+  // the house violet.
+  const heroTint = loadout.background
+    ? tints.background ?? defaultColor("background", loadout.background)
+    : "#8f00ff";
 
   const startUnit = () => {
     if (getSession()) {
@@ -72,7 +78,10 @@ export default function App() {
       <MorphNavbar />
 
       <main id="main" className="relative z-10">
-        <section className="relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24">
+        <section
+          className="relative overflow-hidden pt-28 pb-16 lg:pt-36 lg:pb-24"
+          style={{ "--hero-tint": tintChannels(heroTint) } as CSSProperties}
+        >
           <div aria-hidden="true" className="hero-scrim" />
           <span aria-hidden="true" className="hero-rule" />
           <div aria-hidden="true" className="hero-glow" />
