@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import { useProgress } from "../lib/progress";
-import { Sky, tintChannels } from "./Sky";
 import { Pet } from "./Pet";
 import {
   ACCENTS,
@@ -512,22 +511,27 @@ function SignalArt({ color }: { color: string }) {
   );
 }
 
-/* Event Horizon and Quasar are atmosphere, not illustration: a slow veil of
- * their colour laid over the shared sky. */
-function Veil({ variant, color }: { variant: string; color: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`cosmic-layer sky-veil sky-veil-${variant}`}
-      style={{ "--tint-rgb": tintChannels(color) } as CSSProperties}
-    />
-  );
-}
-
 function Backdrop({ variant, color }: { variant: string; color: string }) {
-  if (variant === "horizon" || variant === "quasar") return <Veil variant={variant} color={color} />;
+  if (variant === "horizon") {
+    return (
+      <div
+        aria-hidden="true"
+        className="cosmic-layer cosmic-horizon"
+        style={{ "--bg-color": color } as CSSProperties}
+      />
+    );
+  }
   if (variant === "orbit") return <OrbitArt color={color} />;
   if (variant === "signal") return <SignalArt color={color} />;
+  if (variant === "quasar") {
+    return (
+      <div
+        aria-hidden="true"
+        className="cosmic-layer cosmic-quasar"
+        style={{ "--bg-color": color } as CSSProperties}
+      />
+    );
+  }
   return <CircuitArt color={color} />;
 }
 
@@ -574,7 +578,6 @@ export function CosmeticsLayer() {
 
   return (
     <>
-      <Sky tint={bgColor} />
       {backdrop && <Backdrop variant={backdrop.variant} color={bgColor} />}
       {trailConfig && <TrailCanvas config={trailConfig} />}
       {pet && <Pet petId={pet} />}

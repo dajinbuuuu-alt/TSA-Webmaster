@@ -541,187 +541,151 @@
   }
 }
 
-/* ---------- Sky, hero rings and the two atmosphere backdrops ---------- */
-
-/* A deep-space wash with grain over it: gradients this large never band, and
-   nothing in here is a bitmap, so it stays sharp at every size. */
-.sky {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: #04050a;
-  pointer-events: none;
-}
-
-.sky-wash {
-  position: absolute;
-  inset: -12%;
-  background:
-    radial-gradient(44% 38% at 8% -6%, rgba(0, 255, 255, 0.16), transparent 64%),
-    radial-gradient(54% 46% at 72% 34%, rgba(124, 42, 255, 0.17), transparent 70%),
-    radial-gradient(58% 44% at 92% 104%, rgb(var(--sky-tint) / 0.11), transparent 72%),
-    radial-gradient(76% 64% at 44% 108%, rgba(10, 18, 34, 0.9), transparent 74%);
-}
-
-.sky-stars {
-  position: absolute;
-  inset: -3%;
-  width: 106%;
-  height: 106%;
-  opacity: 0.85;
-  animation: sky-drift 220s linear infinite alternate;
+.cosmic-horizon {
+  background-color: #000;
+  background-image: url("./assets/event-horizon.jpg");
+  transform-origin: 66% 22%;
+  animation: horizon-breathe 18s ease-in-out infinite;
   will-change: transform;
+  background-position: 66% 16%;
+  background-size: cover;
+  opacity: 0.92;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 46%, transparent 86%);
+  mask-image: linear-gradient(to bottom, black 0%, black 46%, transparent 86%);
 }
 
-@keyframes sky-drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-26px, -16px, 0);
-  }
-}
-
-/* The hero would otherwise put type straight on the wash. */
-.hero-scrim {
+/* the old CSS ring is replaced by the photograph */
+.cosmic-horizon::before {
+  content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      66% 86% at 0% 46%,
-      rgba(0, 0, 0, 0.94) 0%,
-      rgba(0, 0, 0, 0.8) 34%,
-      rgba(0, 0, 0, 0.44) 58%,
-      rgba(0, 0, 0, 0.1) 74%,
-      transparent 84%
-    ),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.42) 0%, transparent 30%);
-}
-
-/* The hero has one light source, and it sits behind the lesson card. */
-.hero-glow {
-  position: absolute;
-  top: 42%;
-  left: 78%;
-  z-index: 0;
-  width: min(900px, 84vw);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  background:
-    radial-gradient(circle, rgb(var(--hero-tint) / 0.3) 0%, rgb(var(--hero-tint) / 0.12) 36%, transparent 64%),
-    radial-gradient(circle at 50% 46%, rgb(var(--hero-tint) / 0.16) 0%, transparent 46%);
-}
-
-/* A hairline under the hero instead of a hard section border. */
-.hero-rule {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 3;
-  height: 1px;
-  pointer-events: none;
+  display: block;
   background: linear-gradient(
     90deg,
-    transparent 0%,
-    rgba(0, 255, 255, 0.16) 26%,
-    rgba(143, 0, 255, 0.22) 64%,
-    transparent 96%
+    #000 0%,
+    rgba(0, 0, 0, 0.82) 24%,
+    rgba(0, 0, 0, 0.38) 46%,
+    transparent 64%
   );
 }
 
-/* Fine orbital lines, centred on that same point: an instrument, not a picture. */
-.hero-rings {
+.cosmic-horizon::after {
+  content: "";
   position: absolute;
-  top: 42%;
-  left: 78%;
-  z-index: 2;
-  width: min(880px, 76vw);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  opacity: 0.85;
-  pointer-events: none;
+  inset: 0;
+  background: var(--bg-color, #ff8a3d);
+  mix-blend-mode: color;
+  opacity: 0.5;
+  animation: horizon-glow 9s ease-in-out infinite;
 }
 
-.hero-rings svg {
-  width: 100%;
-  height: 100%;
-}
-
-/* The rings take their colour from the same light as the bloom. */
-.ring-line {
-  stroke-width: 1;
-}
-
-.ring-a {
-  stroke: rgb(var(--hero-tint) / 0.13);
-}
-
-.ring-b {
-  stroke: rgb(var(--hero-tint) / 0.18);
-}
-
-.ring-c {
-  stroke: rgb(var(--hero-tint) / 0.2);
-}
-
-.ring-arc-line {
-  stroke: rgb(var(--hero-tint) / 0.55);
-}
-
-.ring-arc-line-soft {
-  stroke: rgb(var(--hero-tint) / 0.4);
-}
-
-.ring-node {
-  fill: rgb(var(--hero-tint) / 0.8);
-}
-
-.ring-node-soft {
-  fill: rgb(var(--hero-tint) / 0.55);
-}
-
-.hero-arc {
-  transform-box: view-box;
-  transform-origin: 450px 450px;
-  animation: ring-turn 150s linear infinite;
-}
-
-.hero-arc-slow {
-  animation-duration: 220s;
-  animation-direction: reverse;
-}
-
-@keyframes ring-turn {
-  to {
-    transform: rotate(360deg);
+/* The photo can't physically swirl, so it breathes and brightens instead: slow
+   enough to feel like the disk is turning, small enough to stay sharp. */
+@keyframes horizon-breathe {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.06) rotate(0.8deg);
+    filter: brightness(1.12);
   }
 }
 
-/* Event Horizon and Quasar tint the sky instead of painting a disk into it. */
-.sky-veil {
-  background:
-    radial-gradient(50% 42% at 76% 38%, rgb(var(--tint-rgb) / 0.32), transparent 66%),
-    radial-gradient(64% 40% at 82% 96%, rgb(var(--tint-rgb) / 0.16), transparent 72%);
-  animation: veil-drift 48s ease-in-out infinite alternate;
-}
-
-.sky-veil-quasar {
-  background:
-    radial-gradient(44% 38% at 76% 34%, rgb(var(--tint-rgb) / 0.38), transparent 64%),
-    radial-gradient(58% 34% at 72% 78%, rgb(var(--tint-rgb) / 0.14), transparent 74%);
-}
-
-@keyframes veil-drift {
-  from {
-    opacity: 0.55;
+@keyframes horizon-glow {
+  0%,
+  100% {
+    opacity: 0.44;
   }
-  to {
-    opacity: 0.95;
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Prism's 5-star backdrop: a quasar photo, tinted at runtime. */
+.cosmic-quasar {
+  background-color: #000;
+  background-image: url("./assets/quasar.jpg");
+  transform-origin: 52% 46%;
+  animation: quasar-breathe 15s ease-in-out infinite;
+  will-change: transform;
+  background-position: 64% 50%;
+  background-size: cover;
+  opacity: 0.94;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 72%, transparent 100%);
+}
+
+.cosmic-quasar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.88) 24%,
+    rgba(0, 0, 0, 0.62) 40%,
+    rgba(0, 0, 0, 0.3) 48%,
+    transparent 57%
+  );
+}
+
+.hero-shadow {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 2px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* At tablet-landscape widths the card and copy share the row, so pull the core
+   behind the card instead of behind the headline. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .cosmic-quasar {
+    background-position: 26% 50%;
+  }
+
+  /* The copy takes a bigger share of the row here, so hold it darker longer. */
+  .cosmic-quasar::before {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.9) 42%,
+      rgba(0, 0, 0, 0.72) 53%,
+      rgba(0, 0, 0, 0.34) 61%,
+      transparent 69%
+    );
+  }
+}
+
+.cosmic-quasar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg-color, #ffb066);
+  mix-blend-mode: color;
+  opacity: 0.3;
+  animation: quasar-pulse 10s ease-in-out infinite;
+}
+
+@keyframes quasar-breathe {
+  0%,
+  100% {
+    transform: scale(1) translate3d(0, 0, 0) rotate(0deg);
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    transform: scale(1.05) translate3d(1.4%, -1%, 0) rotate(-0.6deg);
+    filter: brightness(1.1) saturate(1.1);
+  }
+}
+
+@keyframes quasar-pulse {
+  0%,
+  100% {
+    opacity: 0.26;
+  }
+  50% {
+    opacity: 0.38;
   }
 }
 
@@ -944,31 +908,41 @@
   }
 }
 
-/* Below the desktop breakpoint the hero stacks, so hold the type with a
-   top-to-bottom scrim instead of a left-to-right one. */
-@media (max-width: 1023px) {
-  .hero-scrim {
+/* On a phone the horizon fills the hero, so darken it top-to-bottom instead. */
+@media (max-width: 640px) {
+  .cosmic-horizon {
+    background-position: 58% 8%;
+    opacity: 0.8;
+  }
+
+  .cosmic-quasar {
+    background-position: 56% 38%;
+    opacity: 0.84;
+  }
+
+  .cosmic-quasar::before {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.82) 32%,
+        rgba(0, 0, 0, 0.64) 52%,
+        rgba(0, 0, 0, 0.34) 68%,
+        #000 96%
+      );
+  }
+
+  .cosmic-quasar::after {
+    opacity: 0.22;
+  }
+
+  .cosmic-horizon::before {
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.5) 0%,
-      rgba(0, 0, 0, 0.34) 32%,
-      rgba(0, 0, 0, 0.62) 74%,
-      rgba(0, 0, 0, 0.85) 100%
+      rgba(0, 0, 0, 0.72) 0%,
+      rgba(0, 0, 0, 0.42) 42%,
+      #000 94%
     );
-  }
-
-  .hero-glow {
-    top: 30%;
-    left: 64%;
-    width: 150vw;
-    opacity: 0.75;
-  }
-
-  .hero-rings {
-    top: 30%;
-    left: 64%;
-    width: 150vw;
-    opacity: 0.45;
   }
 }
 
